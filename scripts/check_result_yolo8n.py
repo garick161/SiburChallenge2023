@@ -46,8 +46,8 @@ def detect_class(video_path):
                 grad = cv2.GaussianBlur(grey, (5, 5), 0)
 
                 # Работа с результатами модели YOLO
-                # results = model(frame_new, stream=True)
-                results = model(frame_new, show=True)
+                results = model(frame_new, stream=True)
+                # results = model(frame_new, show=True)
                 # создадим матрицу для записи результатов детекции классов на каждом кадре
                 class_arr = np.zeros(shape=9, dtype='uint8')
                 centr_xcoord_arr = np.zeros(shape=9)
