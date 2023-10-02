@@ -11,7 +11,6 @@ df_bad = pd.read_csv('../dataframes/false_class_df.csv')  # датасет с н
 df_good = pd.read_csv('../dataframes/true_class_df.csv') # датасет с верно классифицированными видео
 df = pd.concat((df_bad, df_good), ignore_index=True)
 model = YOLO('weights_ver2.pt')  # предобученная модель с весам
-path_to_images = '../frames_with_boundig_boxes'
 
 
 def select_video(df: pd.DataFrame, count: int = 20) -> np.ndarray:
@@ -28,7 +27,7 @@ def select_video(df: pd.DataFrame, count: int = 20) -> np.ndarray:
     return sel_video
 
 
-def get_frames_with_bb(video_path: str):
+def get_frames_with_bb(video_path: str, path_to_dir: str = '../frames_with_boundig_boxes'):
     """
     Функция берет 1 кадр в секунду, производит детекцию объектов, наносит bounding_boxes
     """
@@ -50,7 +49,7 @@ def get_frames_with_bb(video_path: str):
                 for r in results:
                     im_array = r.plot(pil=True)  # plot a BGR numpy array of predictions
                     im = Image.fromarray(im_array[..., ::-1])  # RGB PIL image
-                    im.save(os.path.join(path_to_images, f"{name_file}_{str(frame_id)}.jpg"))  # save image
+                    im.save(os.path.join(path_to_dir, f"{name_file}_{str(frame_id)}.jpg"))  # save image
         else:  # кадры закончились
             cv2.destroyAllWindows()
             cap.release()
