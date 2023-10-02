@@ -5,6 +5,8 @@ import pandas as pd
 from loguru import logger
 from get_problem_frames import contrast_increase
 
+pd.set_option('display.max_columns', None)
+
 
 class_detect_stats = np.zeros(shape=9, dtype='int32')  # для анализа какие классы лучше определяются
 
