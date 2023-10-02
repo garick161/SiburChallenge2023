@@ -6,7 +6,7 @@ from loguru import logger
 from get_problem_frames import contrast_increase
 
 
-class_detect_stats = np.zeros(shape=12, dtype='int32')  # для анализа какие классы лучше определяются
+class_detect_stats = np.zeros(shape=9, dtype='int32')  # для анализа какие классы лучше определяются
 
 
 @logger.catch
