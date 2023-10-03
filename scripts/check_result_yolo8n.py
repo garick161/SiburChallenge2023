@@ -74,16 +74,12 @@ def detect_class(video_path):
                                                         # внизу кадра, которая на некоторых снимках присутствует
                                     y2 -= 10  # отступаем на 10 пкс вверх и еще раз проверяем
 
-                            # if (y2 + 60) < frame_new.shape[0]:  # Если не выходит за нижние границы изображения
-                            #     y2 += 50
-                            # else:
-                            #     y2 -= 10  # отступ 10 пкс, чтобы не попасть в черную полосу внизу кадра,
-                            #     # которая на некоторых снимках присутствует
                                 bridge_up_flag = True
                                 check_movie_point_x = x1 - 100
                                 check_movie_point_y = y2
+
                         # Если объект в кадре из списка ['plate_type_1', 'plate_type_2'],
-                        # то фиксируем его координаты по x и по y для оценки движения в кадре в будущем
+                        # то фиксируем его координаты центров по x и по y для оценки движения в кадре в будущем
                         if cls in (6, 7):
                             x1, y1, x2, y2 = box.xyxy[0]
                             x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
@@ -101,9 +97,7 @@ def detect_class(video_path):
                     pick_grad_list_1.append(grad[check_movie_point_y][check_movie_point_x])
                     pick_grad_list_2.append(grad[check_movie_point_y - 10][check_movie_point_x + 30])
                     pick_grad_list_3.append(grad[check_movie_point_y - 20][check_movie_point_x + 60])
-                    # cv2.rectangle(frame_new, (check_movie_point_x, check_movie_point_y - 20),
-                    #               (check_movie_point_x + 60, check_movie_point_y), (255, 0, 0), 2)
-                    # cv2.imshow("frame_new", frame_new)
+
         else:  # кадры закончились
             cv2.destroyAllWindows()
             cap.release()
