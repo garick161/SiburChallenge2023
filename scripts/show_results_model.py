@@ -10,7 +10,7 @@ from get_problem_frames import contrast_increase
 df_bad = pd.read_csv('../dataframes/false_class_df.csv')  # датасет с неверно классифицированными видео
 df_good = pd.read_csv('../dataframes/true_class_df.csv') # датасет с верно классифицированными видео
 df = pd.concat((df_bad, df_good), ignore_index=True)
-model = YOLO('weights_ver2.pt')  # предобученная модель с весам
+model = YOLO('weights_ver3.pt')  # предобученная модель с весам
 
 
 def select_video(df: pd.DataFrame, count: int = 20) -> np.ndarray:
