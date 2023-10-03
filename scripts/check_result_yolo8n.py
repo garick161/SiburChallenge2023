@@ -32,7 +32,7 @@ def detect_class(video_path):
     check_movie_point_x = 0
     check_movie_point_y = 0
 
-    model = YOLO('weights_ver2.pt')
+    model = YOLO('weights_ver3.pt')
     cap = cv2.VideoCapture(video_path)
     fps = int(cap.get(cv2.CAP_PROP_FPS))
 
@@ -108,17 +108,23 @@ def detect_class(video_path):
         # matx - матрица координат центров bounding_box для plate первого и второго типа.
         # shape(n, m), где n - количество кадров, m = 2(первый/второй тип площадки)
         non_zero = np.count_nonzero(matx, axis=0)
+        logger.info(f"non_zero {non_zero}")
         if np.max(non_zero) != 0:  # Если ни одного объекта не обнаружено, нечего продолжать
             # Возьмем для анализа лишь тот объект, который больше всего представлен на слайдах
             arr_coord = np.array(matx[:, non_zero.argmax()])
+            arr_coord = arr_coord[arr_coord > 0]
+            logger.info(f"arr_coord {arr_coord}")
             # сделаем сдвиг массива и посчитаем разницу(разницу между соседними элементами)
             diff = arr_coord[1:] - arr_coord[:-1]
+            logger.info(f"diff {diff}")
             # Если в массиве достаточно ненулевых элементов и элементы в массиве diff имеют одинаковый знак, значит
             # значение координат в исходном массиве либо монотонно возрастают или монотонно убывают. Следовательно,
             # есть движение вагона на видео
             if np.count_nonzero(diff) > len(diff) // 2:
                 diff = diff[diff != 0]
-                return (diff > 0).all() if diff[0] > 0 else (diff < 0).all()
+                res = (diff > 0).all() if diff[0] > 0 else (diff < 0).all()
+                logger.info(f"res {res}")
+                return res
 
     # Матрица наличия классов на видео shape(count_frames, count_classes)
     class_matx = np.array(class_matx)
@@ -143,13 +149,16 @@ def detect_class(video_path):
 
     # Итоговое значение классов по всем кадрам: 1 - объект присутствует, 0 - нет. 1 только в том случае,
     # когда присутствует объект на 50% кадров и более
-    result_class_arr = np.where(np.sum(class_matx, axis=0) / len(class_matx) > len(class_matx) // 2, 1, 0)
+    result_class_arr = np.where(np.sum(class_matx, axis=0) > len(class_matx) // 2, 1, 0)
+    logger.info(f'result_class_arr {result_class_arr}')
+
     global class_detect_stats
     class_detect_stats += result_class_arr  # для логирования и статистики
 
     # Принятие решение об операции на видео
-    if result_class_arr[0] == 1 or result_class_arr[1] == 1:  # 'bridge_down_type_1', 'bridge_down_type_2'
-        logger.info('result_class_arr[0] == 1 or result_class_arr[1] == 1 => bridge_down')
+    if (result_class_arr[0] == 1 or result_class_arr[1] == 1) \
+            and (result_class_arr[3] != 1 and result_class_arr[4] != 1):  # 'bridge_down_type_1', 'bridge_down_type_2'
+        logger.info('bridge_down_type_1  or bridge_down_type_2 in frame => bridge_down')
         return class_detect_stats, 'bridge_down'
 
     elif np.sum(class_matx, axis=0)[5] > 1:  # 'coupling' более одного раза встречалось на видео
@@ -157,18 +166,22 @@ def detect_class(video_path):
         return class_detect_stats, 'train_in_out'
 
     elif result_class_arr[8] == 1:  # track in frame
-        logger.info('result_class_arr[8] == 1 free track detected => no_action')
+        logger.info('free track detected => no_action')
         return class_detect_stats, 'no_action'
 
     elif result_class_arr[3] == 1 or result_class_arr[4] == 1:  # bridge_up_type_1 or bridge_up_type_2 in frame
+        logger.info(
+            'bridge_up_type_1 or bridge_up_type_2 detected')
         if result_class_arr[6] == 1 or result_class_arr[7] == 1:  # plate_type_1, plate_type_2 in frame
+            logger.info(
+                'bridge_up_type_1 or bridge_up_type_2 and plates detected')
             if check_move_wagon(matx_xcoord) or check_move_wagon(matx_ycoord):
                 logger.info(
-                    'result_class_arr[3] or result_class_arr[4] -> plates detected -> move detected => train_in_out')
+                    'bridge_up_type_1 or bridge_up_type_2 and plates detected -> move detected => train_in_out')
                 return class_detect_stats, 'train_in_out'
             else:
                 logger.info(
-                    'result_class_arr[3] or result_class_arr[4] -> plates detected -> move not detected => bridge_up')
+                    'bridge_up_type_1 or bridge_up_type_2 and plates detected -> move not detected => bridge_up')
                 return class_detect_stats, 'bridge_up'
         else:  # bridge_up_type_1' or 'bridge_up_type_2 and no one object detected else
             # Если на кадрах не обнаружилось площадок, попробуем оценить наличие движение по
