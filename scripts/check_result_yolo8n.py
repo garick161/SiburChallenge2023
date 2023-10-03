@@ -69,11 +69,15 @@ def detect_class(video_path):
                             x1, _, _, y2 = box.xyxy[0]
                             x1 = int(x1)
                             y2 = int(y2)
-                            if (y2 + 60) < frame_new.shape[0]:  # Если не выходит за нижние границы изображения
-                                y2 += 50
-                            else:
-                                y2 -= 10  # отступ 10 пкс, чтобы не попасть в черную полосу внизу кадра,
-                                # которая на некоторых снимках присутствует
+                            while grad[y2:x1] == 0: # если нижняя точка окна черная, значит попали в черную полосу
+                                                    # внизу кадра, которая на некоторых снимках присутствует
+                                y2 -= 10  # отступаем на 10 пкс вверх и еще раз проверяем
+
+                            # if (y2 + 60) < frame_new.shape[0]:  # Если не выходит за нижние границы изображения
+                            #     y2 += 50
+                            # else:
+                            #     y2 -= 10  # отступ 10 пкс, чтобы не попасть в черную полосу внизу кадра,
+                            #     # которая на некоторых снимках присутствует
                             bridge_up_flag = True
                             check_movie_point_x = x1 - 100
                             check_movie_point_y = y2
@@ -122,7 +126,11 @@ def detect_class(video_path):
             # есть движение вагона на видео
             if np.count_nonzero(diff) > len(diff) // 2:
                 diff = diff[diff != 0]
-                res = (diff > 0).all() if diff[0] > 0 else (diff < 0).all()
+                length = len(diff)
+                n_pos = len(diff > 0)
+                n_neg = length(diff < 0)
+                res = n_pos >= (length - 1) or n_neg >= (length - 1)
+                # res = (diff > 0).all() if diff[0] > 0 else (diff < 0).all()
                 logger.info(f"res {res}")
                 return res
 
@@ -156,8 +164,7 @@ def detect_class(video_path):
     class_detect_stats += result_class_arr  # для логирования и статистики
 
     # Принятие решение об операции на видео
-    if (result_class_arr[0] == 1 or result_class_arr[1] == 1) \
-            and (result_class_arr[3] != 1 and result_class_arr[4] != 1):  # 'bridge_down_type_1', 'bridge_down_type_2'
+    if result_class_arr[0] == 1 or result_class_arr[1] == 1:  # 'bridge_down_type_1', 'bridge_down_type_2'
         logger.info('bridge_down_type_1  or bridge_down_type_2 in frame => bridge_down')
         return class_detect_stats, 'bridge_down'
 
