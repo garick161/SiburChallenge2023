@@ -48,7 +48,7 @@ def detect_class(video_path):
                 grad = cv2.GaussianBlur(grey, (5, 5), 0)
 
                 # Работа с результатами модели YOLO
-                results = model(frame_new, stream=True)
+                results = model(frame_new, stream=True, conf=0.5)
                 # results = model(frame_new, show=True)
                 # создадим матрицу для записи результатов детекции классов на каждом кадре
                 class_arr = np.zeros(shape=9, dtype='uint8')
@@ -69,18 +69,19 @@ def detect_class(video_path):
                             x1, _, _, y2 = box.xyxy[0]
                             x1 = int(x1)
                             y2 = int(y2)
-                            while grad[y2][x1] == 0: # если нижняя точка окна черная, значит попали в черную полосу
-                                                    # внизу кадра, которая на некоторых снимках присутствует
-                                y2 -= 10  # отступаем на 10 пкс вверх и еще раз проверяем
+                            if x1 > grad.shape[0] // 2 and y2 > grad.shape[1] // 2: # точка должна быть в нижнем правом квадрате
+                                while grad[y2][x1] == 0: # если нижняя точка окна черная, значит попали в черную полосу
+                                                        # внизу кадра, которая на некоторых снимках присутствует
+                                    y2 -= 10  # отступаем на 10 пкс вверх и еще раз проверяем
 
                             # if (y2 + 60) < frame_new.shape[0]:  # Если не выходит за нижние границы изображения
                             #     y2 += 50
                             # else:
                             #     y2 -= 10  # отступ 10 пкс, чтобы не попасть в черную полосу внизу кадра,
                             #     # которая на некоторых снимках присутствует
-                            bridge_up_flag = True
-                            check_movie_point_x = x1 - 100
-                            check_movie_point_y = y2
+                                bridge_up_flag = True
+                                check_movie_point_x = x1 - 100
+                                check_movie_point_y = y2
                         # Если объект в кадре из списка ['plate_type_1', 'plate_type_2'],
                         # то фиксируем его координаты по x и по y для оценки движения в кадре в будущем
                         if cls in (6, 7):
@@ -179,7 +180,7 @@ def detect_class(video_path):
     elif result_class_arr[3] == 1 or result_class_arr[4] == 1:  # bridge_up_type_1 or bridge_up_type_2 in frame
         logger.info(
             'bridge_up_type_1 or bridge_up_type_2 detected')
-        if result_class_arr[6] == 1 or result_class_arr[7] == 1:  # plate_type_1, plate_type_2 in frame
+        if np.sum(class_matx, axis=0)[6] > len(class_matx) // 3 or np.sum(class_matx, axis=0)[7] > len(class_matx) // 3:  # plate_type_1, plate_type_2 in frame
             logger.info(
                 'bridge_up_type_1 or bridge_up_type_2 and plates detected')
             if check_move_wagon(matx_xcoord) or check_move_wagon(matx_ycoord):
