@@ -128,7 +128,7 @@ def detect_class(video_path):
                 diff = diff[diff != 0]
                 length = len(diff)
                 n_pos = len(diff > 0)
-                n_neg = length(diff < 0)
+                n_neg = len(diff < 0)
                 res = n_pos >= (length - 1) or n_neg >= (length - 1)
                 # res = (diff > 0).all() if diff[0] > 0 else (diff < 0).all()
                 logger.info(f"res {res}")
