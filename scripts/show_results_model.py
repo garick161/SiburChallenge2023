@@ -56,6 +56,11 @@ def get_frames_with_bb(video_path: str, path_to_dir: str = '../frames_with_bound
             break
 
 
+# cv2.rectangle(frame_new, (check_movie_point_x, check_movie_point_y - 20),
+#               (check_movie_point_x + 60, check_movie_point_y), (255, 0, 0), 2)
+# cv2.imshow("frame_new", frame_new)
+
+
 if __name__ == '__main__':
     sel_videos = select_video(df=df, count=20)
     for path in sel_videos:
