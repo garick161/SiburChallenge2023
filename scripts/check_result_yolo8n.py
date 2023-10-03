@@ -127,14 +127,7 @@ def detect_class(video_path):
             # есть движение вагона на видео
             if np.count_nonzero(diff) > len(diff) * 0.6:
                 diff = diff[diff != 0]
-                logger.info(f"diff {diff}")
-                length = len(diff)
-                n_pos = len(diff > 0)
-                logger.info(f"n_pos {n_pos}")
-                n_neg = len(diff < 0)
-                logger.info(f"n_neg {n_neg}")
-                res = n_pos >= (length - 1) or n_neg >= (length - 1)
-                # res = (diff > 0).all() if diff[0] > 0 else (diff < 0).all()
+                res = (diff > 0).all() if diff[0] > 0 else (diff < 0).all()
                 logger.info(f"res {res}")
                 return res
 
@@ -190,6 +183,9 @@ def detect_class(video_path):
                 logger.info(
                     'bridge_up_type_1 or bridge_up_type_2 and plates detected -> move detected => train_in_out')
                 return class_detect_stats, 'train_in_out'
+            elif median_point_std > 5:
+                logger.info(
+                    'bridge_up_type_1 or bridge_up_type_2 and plates on top of wagon detected(move not detected)-> check test wimdow -> median_std_point > 5 => train_in_out')
             else:
                 logger.info(
                     'bridge_up_type_1 or bridge_up_type_2 and plates detected -> move not detected => bridge_up')
