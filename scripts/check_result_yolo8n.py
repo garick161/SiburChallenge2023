@@ -125,11 +125,14 @@ def detect_class(video_path):
             # Если в массиве достаточно ненулевых элементов и элементы в массиве diff имеют одинаковый знак, значит
             # значение координат в исходном массиве либо монотонно возрастают или монотонно убывают. Следовательно,
             # есть движение вагона на видео
-            if np.count_nonzero(diff) > len(diff) // 2:
+            if np.count_nonzero(diff) > len(diff) * 0.6:
                 diff = diff[diff != 0]
+                logger.info(f"diff {diff}")
                 length = len(diff)
                 n_pos = len(diff > 0)
+                logger.info(f"n_pos {n_pos}")
                 n_neg = len(diff < 0)
+                logger.info(f"n_neg {n_neg}")
                 res = n_pos >= (length - 1) or n_neg >= (length - 1)
                 # res = (diff > 0).all() if diff[0] > 0 else (diff < 0).all()
                 logger.info(f"res {res}")
