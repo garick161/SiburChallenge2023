@@ -186,6 +186,7 @@ def detect_class(video_path):
             elif median_point_std > 5:
                 logger.info(
                     'bridge_up_type_1 or bridge_up_type_2 and plates on top of wagon detected(move not detected)-> check test wimdow -> median_std_point > 5 => train_in_out')
+                return class_detect_stats, 'train_in_out'
             else:
                 logger.info(
                     'bridge_up_type_1 or bridge_up_type_2 and plates detected -> move not detected => bridge_up')
