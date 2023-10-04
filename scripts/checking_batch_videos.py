@@ -3,6 +3,7 @@ import os
 from loguru import logger
 from datetime import datetime as dt
 import time
+from tqdm import tqdm
 from collections import defaultdict
 import pandas as pd
 
