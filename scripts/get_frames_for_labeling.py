@@ -1,3 +1,4 @@
+from get_problem_frames import contrast_increase
 import cv2
 import pandas as pd
 import numpy as np
@@ -7,16 +8,6 @@ import os
 df_bad = pd.read_csv('../dataframes/false_class_df.csv')  # датасет с неверно классифицированными видео
 df_good = pd.read_csv('../dataframes/true_class_df.csv') # датасет с верно классифицированными видео
 path_to_images = '../images_for_labeling'
-
-
-def contrast_increase(image: np.ndarray) -> np.ndarray:
-    clahe = cv2.createCLAHE(clipLimit=3, tileGridSize=(8, 8))
-    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)  # convert from BGR to LAB color space
-    l, a, b = cv2.split(lab)
-    l2 = clahe.apply(l)  # apply CLAHE to the L-channel
-    lab = cv2.merge((l2, a, b))  # merge channels
-    frame_new = cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
-    return frame_new
 
 
 def save_frames(video_path):
@@ -49,12 +40,7 @@ def save_frames(video_path):
             ret, frame = cap.read()
 
             # выполняем повышение контрастности для удаления засвеченности
-            clahe = cv2.createCLAHE(clipLimit=3, tileGridSize=(8, 8))
-            lab = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)  # convert from BGR to LAB color space
-            l, a, b = cv2.split(lab)
-            l2 = clahe.apply(l)  # apply CLAHE to the L-channel
-            lab = cv2.merge((l2, a, b))  # merge channels
-            frame_new = cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
+            frame_new = contrast_increase(frame)
             cv2.imwrite(os.path.join(path_to_images, f'{name_file}_{n_frame}.jpg'), frame_new)
 
 
