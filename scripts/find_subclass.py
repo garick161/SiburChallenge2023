@@ -119,6 +119,26 @@ def plot_cosines(df: pd.DataFrame, split_idx: int):
     plt.show()
 
 
+def plot_subclasses(path_to_df: str):
+    """Функция для визуализации результата разбиения на subclass"""
+    df = pd.read_csv(path_to_df)
+
+    for sub_class in df['sub_class'].unique():
+        temp_df = df[df['sub_class'] == sub_class]
+        count_rows = ceil(len(temp_df) / 5)
+        fig = plt.figure(figsize=(12, count_rows * 2))
+
+        for i, name in enumerate(temp_df['file_name']):
+            img_name = name.split('.')[0]
+            frame = cv2.imread(f'../images_for_emb/no_action/{img_name}.jpg')
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            fig.add_subplot(count_rows, 5, i + 1).set_title(f"sub_class: {sub_class}", size=9)
+            plt.imshow(frame)
+            plt.axis('off')
+
+        plt.show()
+
+
 def calc_cos_dist(df: pd.DataFrame, num_row: int) -> pd.DataFrame:
     matx = df.iloc[:, :25].values
     df['cosine'] = cdist([matx[num_row]], matx, metric='cosine').flatten()
@@ -162,7 +182,8 @@ if __name__ == '__main__':
     path = '../dataframes/no_action_emb.csv'
     # demo_mode(path_to_df=path)
 
-    df = main_mode(path_to_df=path, plot=True, search_range=13)
+    # df = main_mode(path_to_df=path, plot=True, search_range=13)
+    plot_subclasses('../dataframes/no_action_with_subclass.csv')
     # df.to_csv('../dataframes/no_action_with_subclass.csv', index=False)
 
 
