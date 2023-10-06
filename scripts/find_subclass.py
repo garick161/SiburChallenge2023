@@ -32,6 +32,10 @@ def find_similar_frames(cosines: np.ndarray, sim_level: int = 3, threshold: floa
     cos_diff = cosines[1:] - cosines[:-1]
     extremum_list = []
     frames_idx_list = []
+    if (cosines < 0.15).all():  # Если все элементы очень похожи и разница не более 0.1 по сравнению с первым элементом
+                                # -> берем всех в один subclass
+        return len(cosines)
+
     for i in range(1, len(cos_diff)):
         if cosines[i] > 1:  # косинусное расстояние больше 1 => фреймы уже сильно различаются
             if frames_idx_list:
@@ -88,22 +92,24 @@ def plot_cosines(df: pd.DataFrame, split_idx: int):
     cos_diff = cosines[1:] - cosines[:-1]
 
     fig = plt.figure(figsize=(12, 5))
-
     ax = fig.subplots(nrows=1, ncols=2)
 
     ax[0].plot(cosines)
     ax[0].set_title('cosine')
     ax[0].set_xlabel('n_frames')
-    ax[0].annotate('split_point', xy=(split_idx, cosines[split_idx]), xytext=(split_idx + 1, cosines[split_idx] - 0.1),
-                   arrowprops=dict(facecolor='red', shrink=0.05))
+    if split_idx != len(df):
+        ax[0].annotate('split_point', xy=(split_idx, cosines[split_idx]),
+                       xytext=(split_idx + 1, cosines[split_idx] - 0.1),
+                       arrowprops=dict(facecolor='red', shrink=0.05))
     ax[0].set_xticks(df.index)
     ax[0].grid()
     ax[1].plot(cos_diff)
     ax[1].set_title('cos_diff')
     ax[1].set_xlabel('n_frames')
-    ax[1].annotate('split_point', xy=(split_idx - 1, cos_diff[split_idx - 1]),
-                   xytext=(split_idx, cos_diff[split_idx - 1]),
-                   arrowprops=dict(facecolor='red', shrink=0.05))
+    if split_idx != len(df):
+        ax[1].annotate('split_point', xy=(split_idx - 1, cos_diff[split_idx - 1]),
+                       xytext=(split_idx, cos_diff[split_idx - 1]),
+                       arrowprops=dict(facecolor='red', shrink=0.05))
     ax[1].set_xticks(df.index)
     ax[1].grid()
     plt.tight_layout()
@@ -132,6 +138,7 @@ if __name__ == '__main__':
         temp_df = df_slim.copy()
         if selected_mode != 'demo_mode':
             temp_df = temp_df[temp_df['sub_class'] == -1]
+            i = 0
             print(f"temp_df len: {len(temp_df)}")
         temp_df = calc_cos_dist(temp_df, num_row=i)
         split_idx = find_similar_frames(temp_df.head(selected_range)['cosine'].values, sim_level=3)
