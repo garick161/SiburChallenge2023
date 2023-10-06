@@ -138,6 +138,8 @@ if __name__ == '__main__':
         temp_df = df_slim.copy()
         if selected_mode != 'demo_mode':
             temp_df = temp_df[temp_df['sub_class'] == -1]
+            if len(temp_df) == 0:
+                break
             i = 0
             print(f"temp_df len: {len(temp_df)}")
         temp_df = calc_cos_dist(temp_df, num_row=i)
