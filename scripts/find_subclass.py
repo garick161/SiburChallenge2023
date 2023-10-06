@@ -106,7 +106,9 @@ def plot_cosines(df: pd.DataFrame, split_idx: int):
                        xytext=(split_idx + 1, cosines[split_idx] - 0.1),
                        arrowprops=dict(facecolor='red', shrink=0.05))
     ax[0].set_xticks(df.index)
+    ax[0].set_yticks(np.arange(0, 1.1, 0.1))
     ax[0].grid()
+
     ax[1].plot(cos_diff)
     ax[1].set_title('cos_diff')
     ax[1].set_xlabel('n_frames')
@@ -115,9 +117,11 @@ def plot_cosines(df: pd.DataFrame, split_idx: int):
                        xytext=(split_idx, cos_diff[split_idx - 1]),
                        arrowprops=dict(facecolor='red', shrink=0.05))
     ax[1].set_xticks(df.index)
+    ax[1].set_yticks(np.arange(0, 0.75, 0.05))
+    ax[1].axhline(y=0.05, color='red', linestyle='--')
     ax[1].grid()
-    plt.tight_layout()
 
+    plt.tight_layout()
     plt.show()
 
 
@@ -182,10 +186,10 @@ def main_mode(path_to_df: str, path_to_img: str, search_range: int = 20, sim_lev
 
 
 if __name__ == '__main__':
-    path = '../dataframes/bridge_up_emb.csv'
-    path_to_dir_images = '../images_for_emb/bridge_up'
+    path = '../dataframes/bridge_down_emb.csv'
+    path_to_dir_images = '../images_for_emb/bridge_down'
     # demo_mode(path_to_df=path, path_to_img=path_to_dir_images)
 
-    df = main_mode(path_to_df=path, path_to_img=path_to_dir_images, plot=False)
+    df = main_mode(path_to_df=path, path_to_img=path_to_dir_images, plot=False, sim_level=3, search_range=20)
     # plot_subclasses('../dataframes/no_action_with_subclass.csv', path_to_dir_images)
-    df.to_csv('../dataframes/bridge_with_subclass.csv', index=False)
+    df.to_csv('../dataframes/bridge_down_with_subclass.csv', index=False)
