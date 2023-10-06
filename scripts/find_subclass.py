@@ -33,8 +33,8 @@ def find_similar_frames(cosines: np.ndarray, sim_level: int = 3, threshold: floa
     cos_diff = cosines[1:] - cosines[:-1]
     extremum_list = []
     frames_idx_list = []
-    if (cosines < 0.15).all():  # Если все элементы очень похожи и разница не более 0.1 по сравнению с первым элементом
-                                # -> берем всех в один subclass
+    if (cosines < 0.15).all():  # Если все элементы очень похожи и разница не более 0.15 по сравнению с первым элементом
+        # -> берем всех в один subclass
         return len(cosines)
 
     for i in range(1, len(cos_diff) - 1):
@@ -58,10 +58,8 @@ def find_similar_frames(cosines: np.ndarray, sim_level: int = 3, threshold: floa
     # если заявленный уровень sim_level не достигнут, берем индекс последнего максимума
     try:
         return frames_idx_list[-1] + 1
-    except IndexError as e:
-        print("Либо все фреймы одинаковы или очень близки, либо слишком высокий уровень 'sim_level'\nПопробуйте "
-              "уменьшить значение 'sim_level'")
-        return 19
+    except IndexError as e:  # Если экстремумы не обнаружены, считаем все эти фреймы похожими
+        return len(cosines)
 
 
 def reduce_dim(df: pd.DataFrame, len_vect: int = 25) -> np.ndarray:
@@ -82,7 +80,7 @@ def plot_images(df: pd.DataFrame, split_idx: int):
         else:
             color = 'red'
         fig.add_subplot(count_rows, 5, i + 1).set_title(f"idx: {i} / cosine: {round(df.loc[i]['cosine'], 3)}",
-                                                               size=9, color=color)
+                                                        size=9, color=color)
         plt.imshow(frame)
         plt.axis('off')
 
@@ -182,8 +180,6 @@ if __name__ == '__main__':
     path = '../dataframes/no_action_emb.csv'
     # demo_mode(path_to_df=path)
 
-    # df = main_mode(path_to_df=path, plot=True, search_range=13)
-    plot_subclasses('../dataframes/no_action_with_subclass.csv')
+    df = main_mode(path_to_df=path, plot=True, search_range=15)
+    # plot_subclasses('../dataframes/no_action_with_subclass.csv')
     # df.to_csv('../dataframes/no_action_with_subclass.csv', index=False)
-
-
