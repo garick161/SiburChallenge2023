@@ -68,9 +68,34 @@ def plot_images(df: pd.DataFrame):
         img_name = name.split('.')[0]
         frame = cv2.imread(f'../images_for_emb/no_action/{img_name}.jpg')
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        ax = fig.add_subplot(4, 5, i + 1).set_title(f"idx: {i}/cosine: {round(df.loc[i]['cosine'], 3)}", size=9)
+        ax = fig.add_subplot(4, 5, i + 1).set_title(f"idx: {i} / cosine: {round(df.loc[i]['cosine'], 3)}", size=9)
         plt.imshow(frame)
         plt.axis('off')
+
+    plt.show()
+
+
+def plot_cosines(df: pd.DataFrame, split_idx: int):
+    cosines = df.head(20)['cosine'].values
+    cos_diff = cosines[1:] - cosines[:-1]
+
+    fig = plt.figure(figsize=(12, 5))
+
+    ax = fig.subplots(nrows=1, ncols=2)
+
+    ax[0].plot(cosines)
+    ax[0].set_title('cosine')
+    ax[0].set_xlabel('n_frames')
+    ax[0].annotate('split_point', xy=(split_idx, cosines[split_idx]), xytext=(split_idx + 1, cosines[split_idx] - 0.1),
+                   arrowprops=dict(facecolor='red', shrink=0.05))
+    ax[0].set_xticks(df.head(20).index)
+    ax[0].grid()
+    ax[1].plot(cos_diff)
+    ax[1].set_title('cos_diff')
+    ax[1].set_xlabel('n_frames')
+    ax[1].set_xticks(df.head(20).index)
+    ax[1].grid()
+    plt.tight_layout()
 
     plt.show()
 
@@ -81,6 +106,7 @@ def find_subclass_idx(df, num_row):
     df = df.sort_values('cosine').reset_index().rename(columns={'index': 'true_index'})
     split_idx = find_similar_frames(df['cosine'].values)
     if mode != 'main_mode':
+        plot_cosines(df=df, split_idx=split_idx)
         plot_images(df=df)
     return df.loc[0:split_idx]['true_index'].values
 
@@ -99,5 +125,4 @@ if __name__ == '__main__':
         subclass_idx = find_subclass_idx(df=temp_df, num_row=i)
         df_slim.loc[subclass_idx, 'sub_class'] = i
         print(df_slim['sub_class'].value_counts())
-        if i > 1:
-            break
+        break
