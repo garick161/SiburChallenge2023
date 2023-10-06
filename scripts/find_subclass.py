@@ -67,14 +67,14 @@ def reduce_dim(df: pd.DataFrame, len_vect: int = 25) -> np.ndarray:
     return pca.fit_transform(df)
 
 
-def plot_images(df: pd.DataFrame, split_idx: int):
+def plot_images(df: pd.DataFrame, path_to_img: str, split_idx: int):
     """Функция для изображения фреймов с косинусным расстояниями между ними от 1 фрейма"""
     count_rows = ceil(len(df) / 5)
     fig = plt.figure(figsize=(12, count_rows * 2))
 
     for i, name in enumerate(df['file_name']):
         img_name = name.split('.')[0]
-        frame = cv2.imread(f'../images_for_emb/no_action/{img_name}.jpg')
+        frame = cv2.imread(f'{path_to_img}/{img_name}.jpg')
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         if i < split_idx:
             color = 'black'
@@ -121,7 +121,7 @@ def plot_cosines(df: pd.DataFrame, split_idx: int):
     plt.show()
 
 
-def plot_subclasses(path_to_df: str):
+def plot_subclasses(path_to_df: str, path_to_img: str):
     """Функция для визуализации результата разбиения на sub_classes"""
     df = pd.read_csv(path_to_df)
 
@@ -132,7 +132,7 @@ def plot_subclasses(path_to_df: str):
 
         for i, name in enumerate(temp_df['file_name']):
             img_name = name.split('.')[0]
-            frame = cv2.imread(f'../images_for_emb/no_action/{img_name}.jpg')
+            frame = cv2.imread(f'{path_to_img}/{img_name}.jpg')
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             fig.add_subplot(count_rows, 5, i + 1).set_title(f"sub_class: {sub_class}", size=9)
             plt.imshow(frame)
@@ -149,7 +149,7 @@ def calc_cos_dist(df: pd.DataFrame, num_row: int) -> pd.DataFrame:
     return df
 
 
-def demo_mode(path_to_df: str, search_range: int = 20, sim_level: int = 3):
+def demo_mode(path_to_df: str, path_to_img: str, search_range: int = 20, sim_level: int = 3):
     data = pd.read_csv(path_to_df)  # len(df.columns) = 513, df.columns[0] = 'file_name'
     df_slim = pd.DataFrame(reduce_dim(data.iloc[:, 1:]))  # shape(len(df), 25)
     df_slim['file_name'] = data['file_name']
@@ -157,12 +157,12 @@ def demo_mode(path_to_df: str, search_range: int = 20, sim_level: int = 3):
     num_row = np.random.choice(np.arange(len(df_slim)))
     df_slim = calc_cos_dist(df_slim, num_row=num_row)
     split_idx = find_similar_frames(df_slim.head(search_range)['cosine'].values, sim_level=sim_level)
-    plot_images(df=df_slim.head(search_range), split_idx=split_idx)
+    plot_images(df=df_slim.head(search_range), path_to_img=path_to_img, split_idx=split_idx)
     plot_cosines(df=df_slim.head(search_range), split_idx=split_idx)
     return None
 
 
-def main_mode(path_to_df: str, search_range: int = 20, sim_level: int = 3, plot: bool = False):
+def main_mode(path_to_df: str, path_to_img: str, search_range: int = 20, sim_level: int = 3, plot: bool = False):
     data = pd.read_csv(path_to_df)  # len(df.columns) = 513, df.columns[0] = 'file_name'
     df_slim = pd.DataFrame(reduce_dim(data.iloc[:, 1:]))  # shape(len(df), 25)
     df_slim['file_name'] = data['file_name']
@@ -174,7 +174,7 @@ def main_mode(path_to_df: str, search_range: int = 20, sim_level: int = 3, plot:
         temp_df = calc_cos_dist(temp_df, num_row=0)
         split_idx = find_similar_frames(temp_df.head(search_range)['cosine'].values, sim_level=3)
         if plot:
-            plot_images(df=temp_df.head(search_range), split_idx=split_idx)
+            plot_images(df=temp_df.head(search_range), path_to_img=path_to_img, split_idx=split_idx)
             plot_cosines(df=temp_df.head(search_range), split_idx=split_idx)
         subclass_idxs = temp_df.head(split_idx)['true_index'].values
         df_slim.loc[subclass_idxs, 'sub_class'] = i
@@ -183,8 +183,9 @@ def main_mode(path_to_df: str, search_range: int = 20, sim_level: int = 3, plot:
 
 if __name__ == '__main__':
     path = '../dataframes/no_action_emb.csv'
-    # demo_mode(path_to_df=path)
+    path_to_dir_images = '../images_for_emb/no_action'
+    # demo_mode(path_to_df=path, path_to_img=path_to_dir_images)
 
-    df = main_mode(path_to_df=path, plot=True, search_range=15)
-    # plot_subclasses('../dataframes/no_action_with_subclass.csv')
+    # df = main_mode(path_to_df=path, path_to_img=path_to_dir_images, plot=True, search_range=15)
+    plot_subclasses('../dataframes/no_action_with_subclass.csv', path_to_dir_images)
     # df.to_csv('../dataframes/no_action_with_subclass.csv', index=False)
