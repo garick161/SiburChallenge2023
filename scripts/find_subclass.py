@@ -38,11 +38,12 @@ def find_similar_frames(cosines: np.ndarray, sim_level: int = 3, threshold: floa
             else:
                 return 1  # нет ни одного похожего фрейма
         if cos_diff[i - 1] > threshold or cos_diff[i] > threshold:  # значение выше уровня шума
-            if (cos_diff[i] > cos_diff[i - 1]) and (cos_diff[i] > cos_diff[i + 1]):  # обнаружен максимум последовательности
+            if (cos_diff[i] > cos_diff[i - 1]) and (
+                    cos_diff[i] > cos_diff[i + 1]):  # обнаружен максимум последовательности
                 if len(extremum_list) == 0:
                     extremum_list.append(cos_diff[i])
                     frames_idx_list.append(i)
-                elif cos_diff[i] > np.max(extremum_list):  # добавляем только те экстремумы, которые больше предыдущих
+                elif cos_diff[i] / extremum_list[-1] > 0.5:  # добавляем только те экстремумы, которые больше предыдущих
                     extremum_list.append(cos_diff[i])
                     frames_idx_list.append(i)
         if len(extremum_list) == sim_level:
@@ -50,10 +51,11 @@ def find_similar_frames(cosines: np.ndarray, sim_level: int = 3, threshold: floa
 
     # если заявленный уровень sim_level не достигнут, берем индекс последнего максимума
     try:
-        frames_idx_list[-1] + 1
+        return frames_idx_list[-1] + 1
     except IndexError as e:
         print("Либо все фреймы одинаковы или очень близки, либо слишком высокий уровень 'sim_level'\nПопробуйте "
               "уменьшить значение 'sim_level'")
+        return 19
 
 
 def reduce_dim(df: pd.DataFrame, len_vect: int = 25) -> np.ndarray:
@@ -72,7 +74,8 @@ def plot_images(df: pd.DataFrame, split_idx: int):
             color = 'black'
         else:
             color = 'red'
-        fig.add_subplot(4, 5, i + 1).set_title(f"idx: {i} / cosine: {round(df.loc[i]['cosine'], 3)}", size=9, color=color)
+        fig.add_subplot(4, 5, i + 1).set_title(f"idx: {i} / cosine: {round(df.loc[i]['cosine'], 3)}", size=9,
+                                               color=color)
         plt.imshow(frame)
         plt.axis('off')
 
@@ -82,6 +85,9 @@ def plot_images(df: pd.DataFrame, split_idx: int):
 def plot_cosines(df: pd.DataFrame, split_idx: int):
     cosines = df.head(20)['cosine'].values
     cos_diff = cosines[1:] - cosines[:-1]
+    if split_idx > 19:
+        print('Похожих фотографий больше чем 20')
+        split_idx = 19
 
     fig = plt.figure(figsize=(12, 5))
 
@@ -97,7 +103,8 @@ def plot_cosines(df: pd.DataFrame, split_idx: int):
     ax[1].plot(cos_diff)
     ax[1].set_title('cos_diff')
     ax[1].set_xlabel('n_frames')
-    ax[1].annotate('split_point', xy=(split_idx - 1, cos_diff[split_idx - 1]), xytext=(split_idx, cos_diff[split_idx - 1]),
+    ax[1].annotate('split_point', xy=(split_idx - 1, cos_diff[split_idx - 1]),
+                   xytext=(split_idx, cos_diff[split_idx - 1]),
                    arrowprops=dict(facecolor='red', shrink=0.05))
     ax[1].set_xticks(df.head(20).index)
     ax[1].grid()
@@ -110,10 +117,10 @@ def find_subclass_idx(df, num_row):
     matx = df.iloc[:, :25].values
     df['cosine'] = cdist([matx[num_row]], matx, metric='cosine').flatten()
     df = df.sort_values('cosine').reset_index().rename(columns={'index': 'true_index'})
-    split_idx = find_similar_frames(df['cosine'].values)
-    if mode != 'main_mode':
-        plot_cosines(df=df, split_idx=split_idx)
+    split_idx = find_similar_frames(df.head(20)['cosine'].values)
+    if mode == 'demo_mode':
         plot_images(df=df, split_idx=split_idx)
+        plot_cosines(df=df, split_idx=split_idx)
     return df.loc[0:split_idx]['true_index'].values
 
 
@@ -127,9 +134,9 @@ if __name__ == '__main__':
     df_slim['sub_class'] = - 1
 
     for i in range(len(df_slim)):
-        temp_df = df_slim.copy()
-        subclass_idx = find_subclass_idx(df=temp_df, num_row=i)
-        df_slim.loc[subclass_idx, 'sub_class'] = i
-        print(df_slim['sub_class'].value_counts())
-        if i > 1:
-            break
+        if i == 6:
+            temp_df = df_slim.copy()
+            subclass_idx = find_subclass_idx(df=temp_df, num_row=i)
+            df_slim.loc[subclass_idx, 'sub_class'] = i
+            print(i)
+            print(df_slim['sub_class'].value_counts())
