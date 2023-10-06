@@ -5,7 +5,9 @@ import matplotlib.pyplot as plt
 import cv2
 from sklearn.decomposition import PCA
 from scipy.spatial.distance import cdist
-from typing import List
+
+pd.options.mode.chained_assignment = None
+
 
 
 def find_similar_frames(cosines: np.ndarray, sim_level: int = 3, threshold: float = 0.05) -> int:
@@ -137,32 +139,30 @@ def demo_mode(path_to_df: str, search_range: int = 20, sim_level: int = 3):
     return None
 
 
-if __name__ == '__main__':
-    mode_dict = {1: 'demo_mode', 2: 'refactoring_mode', 3: 'main_mode'}
-    path = '../dataframes/no_action_emb.csv'
-    demo_mode(path_to_df=path)
-    # data = pd.read_csv('../dataframes/no_action_emb.csv')  # len(df.columns) = 513, df.columns[0] = 'file_name'
-    # df_slim = pd.DataFrame(reduce_dim(data.iloc[:, 1:]))  # shape(len(df), 25)
-    # df_slim['file_name'] = data['file_name']
-    # df_slim['sub_class'] = - 1
-    # selected_range = 20
+def main_mode(path_to_df: str, search_range: int = 20, sim_level: int = 3, plot: bool=False):
+    data = pd.read_csv(path_to_df)  # len(df.columns) = 513, df.columns[0] = 'file_name'
+    df_slim = pd.DataFrame(reduce_dim(data.iloc[:, 1:]))  # shape(len(df), 25)
+    df_slim['file_name'] = data['file_name']
+    df_slim['sub_class'] = - 1
+    for i in range(len(df_slim)):
+        temp_df = df_slim[df_slim['sub_class'] == -1]
+        if len(temp_df) == 0:
+            break
+        temp_df = calc_cos_dist(temp_df, num_row=0)
+        split_idx = find_similar_frames(temp_df.head(search_range)['cosine'].values, sim_level=3)
+        if plot:
+            plot_images(df=temp_df.head(search_range), split_idx=split_idx)
+            plot_cosines(df=temp_df.head(search_range), split_idx=split_idx)
+        subclass_idxs = temp_df.head(split_idx)['true_index'].values
+        df_slim.loc[subclass_idxs, 'sub_class'] = i
+    return df_slim
 
-    # for i in range(len(df_slim)):
-    #     temp_df = df_slim.copy()
-    #     if selected_mode != 'demo_mode':
-    #         temp_df = temp_df[temp_df['sub_class'] == -1]
-    #         if len(temp_df) == 0:
-    #             break
-    #         i = 0
-    #         print(f"temp_df len: {len(temp_df)}")
-    #     temp_df = calc_cos_dist(temp_df, num_row=i)
-    #     split_idx = find_similar_frames(temp_df.head(selected_range)['cosine'].values, sim_level=3)
-    #     print(split_idx)
-    #     if selected_mode != 'main_mode':
-    #         plot_images(df=temp_df.head(selected_range), split_idx=split_idx)
-    #         plot_cosines(df=temp_df.head(selected_range), split_idx=split_idx)
-    #     subclass_idx = temp_df.head(split_idx)['true_index'].values
-    #     print(subclass_idx)
-    #     df_slim.loc[subclass_idx, 'sub_class'] = i
-    #     print(i)
-    #     print(df_slim['sub_class'].value_counts())
+
+if __name__ == '__main__':
+    path = '../dataframes/no_action_emb.csv'
+    # demo_mode(path_to_df=path)
+
+    df = main_mode(path_to_df=path)
+    df.to_csv('../dataframes/no_action_with_subclass.csv', index=False)
+
+
