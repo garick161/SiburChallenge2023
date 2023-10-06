@@ -9,7 +9,6 @@ from scipy.spatial.distance import cdist
 pd.options.mode.chained_assignment = None
 
 
-
 def find_similar_frames(cosines: np.ndarray, sim_level: int = 3, threshold: float = 0.05) -> int:
     """
     Функция получает отсортированный массив косинусных расстояний по возрастанию и определяет индекс элемента.
@@ -38,7 +37,7 @@ def find_similar_frames(cosines: np.ndarray, sim_level: int = 3, threshold: floa
                                 # -> берем всех в один subclass
         return len(cosines)
 
-    for i in range(1, len(cos_diff)):
+    for i in range(1, len(cos_diff) - 1):
         if cosines[i] > 1:  # косинусное расстояние больше 1 => фреймы уже сильно различаются
             if frames_idx_list:
                 return frames_idx_list[-1] + 1  # индекс последнего максимума
@@ -163,7 +162,7 @@ if __name__ == '__main__':
     path = '../dataframes/no_action_emb.csv'
     # demo_mode(path_to_df=path)
 
-    df = main_mode(path_to_df=path, plot=True, search_range=15)
+    df = main_mode(path_to_df=path, plot=True, search_range=13)
     # df.to_csv('../dataframes/no_action_with_subclass.csv', index=False)
 
 
