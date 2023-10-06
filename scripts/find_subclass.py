@@ -71,7 +71,8 @@ def reduce_dim(df: pd.DataFrame, len_vect: int = 25) -> np.ndarray:
 
 
 def plot_images(df: pd.DataFrame, split_idx: int):
-    fig = plt.figure(figsize=(12, 8))
+    count_rows = ceil(len(df) / 5)
+    fig = plt.figure(figsize=(12, count_rows * 2))
 
     for i, name in enumerate(df['file_name']):
         img_name = name.split('.')[0]
@@ -81,7 +82,7 @@ def plot_images(df: pd.DataFrame, split_idx: int):
             color = 'black'
         else:
             color = 'red'
-        fig.add_subplot(ceil(len(df) / 5), 5, i + 1).set_title(f"idx: {i} / cosine: {round(df.loc[i]['cosine'], 3)}",
+        fig.add_subplot(count_rows, 5, i + 1).set_title(f"idx: {i} / cosine: {round(df.loc[i]['cosine'], 3)}",
                                                                size=9, color=color)
         plt.imshow(frame)
         plt.axis('off')
@@ -139,7 +140,7 @@ def demo_mode(path_to_df: str, search_range: int = 20, sim_level: int = 3):
     return None
 
 
-def main_mode(path_to_df: str, search_range: int = 20, sim_level: int = 3, plot: bool=False):
+def main_mode(path_to_df: str, search_range: int = 20, sim_level: int = 3, plot: bool = False):
     data = pd.read_csv(path_to_df)  # len(df.columns) = 513, df.columns[0] = 'file_name'
     df_slim = pd.DataFrame(reduce_dim(data.iloc[:, 1:]))  # shape(len(df), 25)
     df_slim['file_name'] = data['file_name']
@@ -162,7 +163,7 @@ if __name__ == '__main__':
     path = '../dataframes/no_action_emb.csv'
     # demo_mode(path_to_df=path)
 
-    df = main_mode(path_to_df=path)
-    df.to_csv('../dataframes/no_action_with_subclass.csv', index=False)
+    df = main_mode(path_to_df=path, plot=True, search_range=15)
+    # df.to_csv('../dataframes/no_action_with_subclass.csv', index=False)
 
 
