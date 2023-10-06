@@ -63,11 +63,8 @@ def find_subclass_idx(df, num_row):
     matx = df.iloc[:, :25].values
     df['cosine'] = cdist([matx[num_row]], matx, metric='cosine').flatten()
     df = df.sort_values('cosine').reset_index().rename(columns={'index': 'true_index'})
-    split_idx = find_similar_frames(df.head(20)['cosine'].values)
-    print(split_idx)
-    res = df.loc[0:split_idx]['true_index'].values
-    print(res)
-    return res
+    split_idx = find_similar_frames(df['cosine'].values)
+    return df.loc[0:split_idx]['true_index'].values
 
 
 if __name__ == '__main__':
