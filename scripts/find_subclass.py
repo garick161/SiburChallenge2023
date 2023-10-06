@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from math import ceil
 import matplotlib.pyplot as plt
 import cv2
 from sklearn.decomposition import PCA
@@ -66,7 +67,7 @@ def reduce_dim(df: pd.DataFrame, len_vect: int = 25) -> np.ndarray:
 def plot_images(df: pd.DataFrame, split_idx: int):
     fig = plt.figure(figsize=(12, 8))
 
-    for i, name in enumerate(df.head(20)['file_name']):
+    for i, name in enumerate(df['file_name']):
         img_name = name.split('.')[0]
         frame = cv2.imread(f'../images_for_emb/no_action/{img_name}.jpg')
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -74,8 +75,8 @@ def plot_images(df: pd.DataFrame, split_idx: int):
             color = 'black'
         else:
             color = 'red'
-        fig.add_subplot(4, 5, i + 1).set_title(f"idx: {i} / cosine: {round(df.loc[i]['cosine'], 3)}", size=9,
-                                               color=color)
+        fig.add_subplot(ceil(len(df) / 5), 5, i + 1).set_title(f"idx: {i} / cosine: {round(df.loc[i]['cosine'], 3)}",
+                                                               size=9, color=color)
         plt.imshow(frame)
         plt.axis('off')
 
@@ -83,11 +84,8 @@ def plot_images(df: pd.DataFrame, split_idx: int):
 
 
 def plot_cosines(df: pd.DataFrame, split_idx: int):
-    cosines = df.head(20)['cosine'].values
+    cosines = df['cosine'].values
     cos_diff = cosines[1:] - cosines[:-1]
-    if split_idx > 19:
-        print('Похожих фотографий больше чем 20')
-        split_idx = 19
 
     fig = plt.figure(figsize=(12, 5))
 
@@ -98,7 +96,7 @@ def plot_cosines(df: pd.DataFrame, split_idx: int):
     ax[0].set_xlabel('n_frames')
     ax[0].annotate('split_point', xy=(split_idx, cosines[split_idx]), xytext=(split_idx + 1, cosines[split_idx] - 0.1),
                    arrowprops=dict(facecolor='red', shrink=0.05))
-    ax[0].set_xticks(df.head(20).index)
+    ax[0].set_xticks(df.index)
     ax[0].grid()
     ax[1].plot(cos_diff)
     ax[1].set_title('cos_diff')
@@ -106,37 +104,47 @@ def plot_cosines(df: pd.DataFrame, split_idx: int):
     ax[1].annotate('split_point', xy=(split_idx - 1, cos_diff[split_idx - 1]),
                    xytext=(split_idx, cos_diff[split_idx - 1]),
                    arrowprops=dict(facecolor='red', shrink=0.05))
-    ax[1].set_xticks(df.head(20).index)
+    ax[1].set_xticks(df.index)
     ax[1].grid()
     plt.tight_layout()
 
     plt.show()
 
 
-def find_subclass_idx(df, num_row):
+def calc_cos_dist(df: pd.DataFrame, num_row: int) -> pd.DataFrame:
     matx = df.iloc[:, :25].values
     df['cosine'] = cdist([matx[num_row]], matx, metric='cosine').flatten()
     df = df.sort_values('cosine').reset_index().rename(columns={'index': 'true_index'})
-    split_idx = find_similar_frames(df.head(20)['cosine'].values)
-    if mode == 'demo_mode':
-        plot_images(df=df, split_idx=split_idx)
-        plot_cosines(df=df, split_idx=split_idx)
-    return df.loc[0:split_idx]['true_index'].values
+    return df
+
+
+# def find_subclass_idx(df: pd.DataFrame, num_row: int, mode: str, search_range: int = 20):
+#
+#     split_idx = find_similar_frames(df.head(search_range)['cosine'].values)
+#     if mode == 'demo_mode':
+#         plot_images(df=df, split_idx=split_idx)
+#         plot_cosines(df=df, split_idx=split_idx)
+#     return df.loc[0:split_idx]['true_index'].values
 
 
 if __name__ == '__main__':
     mode_dict = {1: 'demo_mode', 2: 'refactoring_mode', 3: 'main_mode'}
     print('Выберите режим работы\n1 - demo_mode\t2 - refactoring_mode\t3 - main_mode\nВведите только цифру')
-    mode = mode_dict[int(input())]
+    selected_mode = mode_dict[int(input())]
     data = pd.read_csv('../dataframes/no_action_emb.csv')  # len(df.columns) = 513, df.columns[0] = 'file_name'
     df_slim = pd.DataFrame(reduce_dim(data.iloc[:, 1:]))  # shape(len(df), 25)
     df_slim['file_name'] = data['file_name']
     df_slim['sub_class'] = - 1
+    selected_range = 20
 
     for i in range(len(df_slim)):
-        if i == 6:
-            temp_df = df_slim.copy()
-            subclass_idx = find_subclass_idx(df=temp_df, num_row=i)
-            df_slim.loc[subclass_idx, 'sub_class'] = i
-            print(i)
-            print(df_slim['sub_class'].value_counts())
+        temp_df = df_slim.copy()
+        temp_df = calc_cos_dist(temp_df, num_row=i)
+        split_idx = find_similar_frames(temp_df.head(selected_range)['cosine'].values, sim_level=3)
+        if selected_mode == 'demo_mode':
+            plot_images(df=temp_df.head(selected_range), split_idx=split_idx)
+            plot_cosines(df=temp_df.head(selected_range), split_idx=split_idx)
+        subclass_idx = temp_df.loc[0:split_idx]['true_index'].values
+        df_slim.loc[subclass_idx, 'sub_class'] = i
+        print(i)
+        print(df_slim['sub_class'].value_counts())
