@@ -61,14 +61,18 @@ def reduce_dim(df: pd.DataFrame, len_vect: int = 25) -> np.ndarray:
     return pca.fit_transform(df)
 
 
-def plot_images(df: pd.DataFrame):
+def plot_images(df: pd.DataFrame, split_idx: int):
     fig = plt.figure(figsize=(12, 8))
 
     for i, name in enumerate(df.head(20)['file_name']):
         img_name = name.split('.')[0]
         frame = cv2.imread(f'../images_for_emb/no_action/{img_name}.jpg')
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        ax = fig.add_subplot(4, 5, i + 1).set_title(f"idx: {i} / cosine: {round(df.loc[i]['cosine'], 3)}", size=9)
+        if i < split_idx:
+            color = 'black'
+        else:
+            color = 'red'
+        fig.add_subplot(4, 5, i + 1).set_title(f"idx: {i} / cosine: {round(df.loc[i]['cosine'], 3)}", size=9, color=color)
         plt.imshow(frame)
         plt.axis('off')
 
@@ -93,6 +97,8 @@ def plot_cosines(df: pd.DataFrame, split_idx: int):
     ax[1].plot(cos_diff)
     ax[1].set_title('cos_diff')
     ax[1].set_xlabel('n_frames')
+    ax[1].annotate('split_point', xy=(split_idx - 1, cos_diff[split_idx - 1]), xytext=(split_idx, cos_diff[split_idx - 1]),
+                   arrowprops=dict(facecolor='red', shrink=0.05))
     ax[1].set_xticks(df.head(20).index)
     ax[1].grid()
     plt.tight_layout()
@@ -107,7 +113,7 @@ def find_subclass_idx(df, num_row):
     split_idx = find_similar_frames(df['cosine'].values)
     if mode != 'main_mode':
         plot_cosines(df=df, split_idx=split_idx)
-        plot_images(df=df)
+        plot_images(df=df, split_idx=split_idx)
     return df.loc[0:split_idx]['true_index'].values
 
 
@@ -125,4 +131,5 @@ if __name__ == '__main__':
         subclass_idx = find_subclass_idx(df=temp_df, num_row=i)
         df_slim.loc[subclass_idx, 'sub_class'] = i
         print(df_slim['sub_class'].value_counts())
-        break
+        if i > 1:
+            break
