@@ -68,6 +68,7 @@ def reduce_dim(df: pd.DataFrame, len_vect: int = 25) -> np.ndarray:
 
 
 def plot_images(df: pd.DataFrame, split_idx: int):
+    """Функция для изображения фреймов с косинусным расстояниями между ними от 1 фрейма"""
     count_rows = ceil(len(df) / 5)
     fig = plt.figure(figsize=(12, count_rows * 2))
 
@@ -88,6 +89,9 @@ def plot_images(df: pd.DataFrame, split_idx: int):
 
 
 def plot_cosines(df: pd.DataFrame, split_idx: int):
+    """Функция выводит 2 графика:
+    1) Зависимость косинусного расстояния при переходе от 1-го фрейма к остальным
+    2) Зависимость разницы косинусного расстояния при переходе от 1-го фрейма к остальным"""
     cosines = df['cosine'].values
     cos_diff = cosines[1:] - cosines[:-1]
 
@@ -118,7 +122,7 @@ def plot_cosines(df: pd.DataFrame, split_idx: int):
 
 
 def plot_subclasses(path_to_df: str):
-    """Функция для визуализации результата разбиения на subclass"""
+    """Функция для визуализации результата разбиения на sub_classes"""
     df = pd.read_csv(path_to_df)
 
     for sub_class in df['sub_class'].unique():
@@ -138,6 +142,7 @@ def plot_subclasses(path_to_df: str):
 
 
 def calc_cos_dist(df: pd.DataFrame, num_row: int) -> pd.DataFrame:
+    """Функция подсчета косинусного расстояния"""
     matx = df.iloc[:, :25].values
     df['cosine'] = cdist([matx[num_row]], matx, metric='cosine').flatten()
     df = df.sort_values('cosine').reset_index().rename(columns={'index': 'true_index'})
