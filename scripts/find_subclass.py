@@ -38,7 +38,7 @@ def find_similar_frames(cosines: np.ndarray, sim_level: int = 3, threshold: floa
         return len(cosines)
 
     for i in range(1, len(cos_diff) - 1):
-        if cosines[i] > 1:  # косинусное расстояние больше 1 => фреймы уже сильно различаются
+        if cosines[i] > 0.7:  # косинусное расстояние больше 1 => фреймы уже сильно различаются
             if frames_idx_list:
                 return frames_idx_list[-1] + 1  # индекс последнего максимума
             else:
@@ -182,10 +182,10 @@ def main_mode(path_to_df: str, path_to_img: str, search_range: int = 20, sim_lev
 
 
 if __name__ == '__main__':
-    path = '../dataframes/no_action_emb.csv'
-    path_to_dir_images = '../images_for_emb/no_action'
+    path = '../dataframes/bridge_up_emb.csv'
+    path_to_dir_images = '../images_for_emb/bridge_up'
     # demo_mode(path_to_df=path, path_to_img=path_to_dir_images)
 
-    # df = main_mode(path_to_df=path, path_to_img=path_to_dir_images, plot=True, search_range=15)
-    plot_subclasses('../dataframes/no_action_with_subclass.csv', path_to_dir_images)
-    # df.to_csv('../dataframes/no_action_with_subclass.csv', index=False)
+    df = main_mode(path_to_df=path, path_to_img=path_to_dir_images, plot=False)
+    # plot_subclasses('../dataframes/no_action_with_subclass.csv', path_to_dir_images)
+    df.to_csv('../dataframes/bridge_with_subclass.csv', index=False)
