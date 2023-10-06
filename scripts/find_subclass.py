@@ -118,15 +118,6 @@ def calc_cos_dist(df: pd.DataFrame, num_row: int) -> pd.DataFrame:
     return df
 
 
-# def find_subclass_idx(df: pd.DataFrame, num_row: int, mode: str, search_range: int = 20):
-#
-#     split_idx = find_similar_frames(df.head(search_range)['cosine'].values)
-#     if mode == 'demo_mode':
-#         plot_images(df=df, split_idx=split_idx)
-#         plot_cosines(df=df, split_idx=split_idx)
-#     return df.loc[0:split_idx]['true_index'].values
-
-
 if __name__ == '__main__':
     mode_dict = {1: 'demo_mode', 2: 'refactoring_mode', 3: 'main_mode'}
     print('Выберите режим работы\n1 - demo_mode\t2 - refactoring_mode\t3 - main_mode\nВведите только цифру')
@@ -139,12 +130,17 @@ if __name__ == '__main__':
 
     for i in range(len(df_slim)):
         temp_df = df_slim.copy()
+        if selected_mode != 'demo_mode':
+            temp_df = temp_df[temp_df['sub_class'] == -1]
+            print(f"temp_df len: {len(temp_df)}")
         temp_df = calc_cos_dist(temp_df, num_row=i)
         split_idx = find_similar_frames(temp_df.head(selected_range)['cosine'].values, sim_level=3)
-        if selected_mode == 'demo_mode':
+        print(split_idx)
+        if selected_mode != 'main_mode':
             plot_images(df=temp_df.head(selected_range), split_idx=split_idx)
             plot_cosines(df=temp_df.head(selected_range), split_idx=split_idx)
-        subclass_idx = temp_df.loc[0:split_idx]['true_index'].values
+        subclass_idx = temp_df.head(split_idx)['true_index'].values
+        print(subclass_idx)
         df_slim.loc[subclass_idx, 'sub_class'] = i
         print(i)
         print(df_slim['sub_class'].value_counts())
