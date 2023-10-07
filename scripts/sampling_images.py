@@ -6,9 +6,15 @@ from typing import List
 
 
 def get_sample_indexes(path_to_df: str, random_state: int = 2023, reduce_coef: float = 1.0) -> List:
+    """Функция определяет индексы фотографий, которые нужно взять для обучения
+    """
     df = pd.read_csv(path_to_df)
-    rs = np.random.RandomState(random_state)
+    rs = np.random.RandomState(random_state)  # зафиксируем для воспроизводимости результатов
 
+    # thresh - верхняя граница идеального равномерного распределения
+    # При reduce_coef = 1 -> примерно 60% попадут в выборку
+    # Если получается слишком много фотографий на ваш взгляд, то выборку можно уменьшить с помощью снижения reduce_coef
+    # Мы будем использовать reduce_coef = 0.6
     thresh = int((len(df) / df['sub_class'].nunique()) * reduce_coef)
     idx_list = []
 
@@ -30,7 +36,6 @@ def copy_img_for_labeling(path_to_df: str, idx: List, path_to_save: str):
     files_list = df.loc[idx]['path_to_img'].to_list()
     for path in files_list:
         shutil.copy(os.path.join(path), os.path.join(path_to_save))
-
     return None
 
 
@@ -46,7 +51,7 @@ def save_train_test_df(path_to_df: str, idx: List, class_name: str):
 if __name__ == '__main__':
     path = '../dataframes/bridge_down_with_subclass.csv'
     path_to_save = '../images_for_labeling'
-    class_name = 'bridge_down'
+    name_cls = 'bridge_down'
     idx = get_sample_indexes(path_to_df=path, reduce_coef=0.6)
     copy_img_for_labeling(path_to_df=path, idx=idx, path_to_save=path_to_save)
-    save_train_test_df(path_to_df=path, idx=idx, class_name=class_name)
+    save_train_test_df(path_to_df=path, idx=idx, class_name=name_cls)
