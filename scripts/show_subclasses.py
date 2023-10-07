@@ -1,7 +1,7 @@
 import pandas as pd
-from math import ceil
 import matplotlib.pyplot as plt
 import cv2
+from math import ceil
 
 
 def plot_subclasses(path: str):
@@ -25,6 +25,6 @@ def plot_subclasses(path: str):
 
 
 if __name__ == '__main__':
-    path_to_df = '../dataframes/no_action_with_subclass.csv'
+    path_to_df = '../dataframes/bridge_down_with_subclass.csv'
     plot_subclasses(path_to_df)
 
