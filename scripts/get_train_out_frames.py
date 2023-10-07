@@ -1,47 +1,31 @@
-from get_problem_frames import contrast_increase
-import cv2
 import pandas as pd
 import numpy as np
+import cv2
 import os
+from contrast_increase import contrast_increase
 
 
+def frames_for_labeling(path_to_df: str):
+    """Функция для получения фреймов из видео для дальнейшей разметки"""
+    df = pd.read_csv(path_to_df)
 
-# def save_frames(video_path):
-#     """
-#     Функция для получения фреймов из видео для дальнейшей разметки
-#     :param video_path: str
-#     :return: None
-#     """
-#     path, file = video_path.rsplit('\\', 1)
-#     name_file = file.split('.')[0]
-#     class_name = path.rsplit('/', 1)[1]
-#
-#     cap = cv2.VideoCapture(video_path)
-#     count_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-#
-#     # Если класс видео ('bridge_down', 'bridge_up', 'no_action') => берем только один центральный кадр
-#     if class_name in ('bridge_down', 'bridge_up', 'no_action'):
-#         n_frame = count_frames // 2
-#         cap.set(cv2.CAP_PROP_POS_FRAMES, n_frame - 1)
-#         ret, frame = cap.read()
-#
-#         # выполняем повышение контрастности для удаления засвеченности
-#         frame_new = contrast_increase(frame)
-#         cv2.imwrite(os.path.join(path_to_images, f'{name_file}_{n_frame}.jpg'), frame_new)
-#     else:
-#         # Если класс видео 'train_in_out' => берем 5 равномерно распределенных кадров
-#         frames = np.linspace(1, count_frames, 5, dtype='int32')
-#         for n_frame in frames:
-#             cap.set(cv2.CAP_PROP_POS_FRAMES, n_frame - 1)
-#             ret, frame = cap.read()
-#
-#             # выполняем повышение контрастности для удаления засвеченности
-#             frame_new = contrast_increase(frame)
-#             cv2.imwrite(os.path.join(path_to_images, f'{name_file}_{n_frame}.jpg'), frame_new)
+    for video_path in df['path_to_video']:
+        name = video_path.rsplit('\\')[-1].split('.')[0]
+        cap = cv2.VideoCapture(video_path)
+        count_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+        # берем 5 равномерно распределенных кадров
+        frames = np.linspace(1, count_frames, 5, dtype='int32')
+        for n_frame in frames:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, n_frame - 1)
+            ret, frame = cap.read()
+
+            # выполняем повышение контрастности для удаления засвеченности
+            frame_new = contrast_increase(frame)
+            cv2.imwrite(os.path.join('../images_for_labeling', f'{name}_{n_frame}.jpg'), frame_new)
 
 
-
-def save_train_test_df(path_to_video: str, random_state: int=2023, test_ratio: float=0.2):
+def save_train_test_df(path_to_video: str, random_state: int = 2023, test_ratio: float = 0.2):
     df = pd.DataFrame()
     path_list = []
     for entry in os.scandir(path_to_video):
@@ -57,3 +41,4 @@ def save_train_test_df(path_to_video: str, random_state: int=2023, test_ratio: f
 if __name__ == '__main__':
     path_video_dir = '../prepair_dataset/train/train_in_out'
     save_train_test_df(path_to_video=path_video_dir)
+    frames_for_labeling(path_to_df='../dataframes/train_out_train.csv')
