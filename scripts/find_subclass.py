@@ -192,8 +192,8 @@ def main_mode(path_to_df: str, path_to_img: str, search_range: int = 20, sim_lev
 
 
 if __name__ == '__main__':
-    path = '../dataframes/no_action_emb.csv'
-    path_to_dir_images = '../images_for_emb/no_action'
+    path = '../dataframes/bridge_down_emb.csv'
+    path_to_dir_images = '../images_for_emb/bridge_down'
     # demo_mode(path_to_df=path, path_to_img=path_to_dir_images)
 
     df = main_mode(path_to_df=path, path_to_img=path_to_dir_images, plot=False, sim_level=3, search_range=20)
@@ -201,4 +201,4 @@ if __name__ == '__main__':
     df = df.iloc[:, -2:]  # Датафрейм без эмбеддингов, нам они больше не нужны
     df = df.apply(name2path, axis=1)  # косметические преобразования для удобства в дальнейшем
     df = df.rename(columns={'file_name': 'path_to_img'})
-    df.to_csv('../dataframes/no_action_with_subclass.csv', index=False)
+    df.to_csv('../dataframes/bridge_down_with_subclass.csv', index=False)
