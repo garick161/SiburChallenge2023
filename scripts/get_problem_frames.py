@@ -1,23 +1,8 @@
 from ultralytics import YOLO
 import cv2
-import pandas as pd
-import numpy as np
 from PIL import Image
 import os
-
-df = pd.read_csv('../dataframes/false_class_df.csv')  # датасет с неверно классифицированными видео
-model = YOLO('best.pt')  # предобученная модель с весам
-path_to_images = '../bad_frames'
-
-
-def contrast_increase(image: np.ndarray) -> np.ndarray:
-    clahe = cv2.createCLAHE(clipLimit=3, tileGridSize=(8, 8))
-    lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)  # convert from BGR to LAB color space
-    l, a, b = cv2.split(lab)
-    l2 = clahe.apply(l)  # apply CLAHE to the L-channel
-    lab = cv2.merge((l2, a, b))  # merge channels
-    frame_new = cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
-    return frame_new
+from contrast_increase import contrast_increase
 
 
 def save_problem_frame(video_path: str):
@@ -26,8 +11,8 @@ def save_problem_frame(video_path: str):
     :param video_path: str
     :return: None
     """
-
-    name_file = video_path.rsplit('\\', 1)[1].split('.')[0]
+    print(video_path)
+    name_file = video_path.rsplit('/', 1)[1].split('.')[0]
     cap = cv2.VideoCapture(video_path)
     fps = int(cap.get(cv2.CAP_PROP_FPS))
 
@@ -52,5 +37,6 @@ def save_problem_frame(video_path: str):
 
 
 if __name__ == '__main__':
-    for video in df['path']:
-        save_problem_frame(video)
+    model = YOLO('weights_ver4.pt')  # предобученная модель с весам
+    path_to_images = '../bad_frames'
+    save_problem_frame('../prepair_dataset/train/bridge_down/166d7e253ba332c3.mp4')
