@@ -16,6 +16,7 @@ def get_sample_indexes(path_to_df: str, random_state: int = 2023, reduce_coef: f
     # Если получается слишком много фотографий на ваш взгляд, то выборку можно уменьшить с помощью снижения reduce_coef
     # Мы будем использовать reduce_coef = 0.6
     thresh = int((len(df) / df['sub_class'].nunique()) * reduce_coef)
+    print(f'Порог разбиения: {thresh} frames')
     idx_list = []
 
     for cls in df['sub_class'].unique():
@@ -43,6 +44,8 @@ def save_train_test_df(path_to_df: str, idx: List, class_name: str):
     df = pd.read_csv(path_to_df)
     train = df[df.index.isin(idx)]
     test = df[~df.index.isin(idx)]
+    print(f'Исходное количество фотографий: {len(df)}')
+    print(f'Отобранное для обучения количество фотографий: {len(train)}')
     train.to_csv(f'../dataframes/{class_name}_train.csv', index=False)
     test.to_csv(f'../dataframes/{class_name}_test.csv', index=False)
     return None
