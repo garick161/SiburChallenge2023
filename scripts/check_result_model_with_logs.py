@@ -12,10 +12,8 @@ class_detect_stats = np.zeros(shape=8, dtype='int32')  # для анализа �
 
 @logger.catch
 def detect_class(video_path):
-    # classes = ['bridge_down_type_1', 'bridge_down_type_2', 'bridge_up', 'bridge_up_type_1', 'bridge_up_type_2',
-    #            'coupling', 'plate_type_1', 'plate_type_2', 'track']
-    classes = ['bridge_down_1', 'bridge_down_2', 'bridge_up_1', 'bridge_up_2', 'coupling', 'plate_type_1', 'plate_type_2',
-             'track']
+    classes = ['bridge_down_1', 'bridge_down_2', 'bridge_up_1', 'bridge_up_2', 'coupling', 'plate_type_1',
+               'plate_type_2', 'track']
 
     # Подготовим нужные объекты
     # Списки для формирования матриц градиента цвета в контрольных точках
