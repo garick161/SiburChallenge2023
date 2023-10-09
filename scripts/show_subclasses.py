@@ -25,6 +25,8 @@ def plot_subclasses(path: str):
 
 
 if __name__ == '__main__':
-    path_to_df = '../dataframes/bridge_down_with_subclass.csv'
+    print("Введите имя класса видео")
+    cls = input()
+    path_to_df = f'../dataframes/{cls}_with_subclass.csv'
     plot_subclasses(path_to_df)
 
