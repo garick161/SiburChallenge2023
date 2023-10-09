@@ -30,8 +30,6 @@ def get_sample_indexes(path_to_df: str, random_state: int = 2023, reduce_coef: f
 
 
 def copy_img_for_labeling(path_to_df: str, idx: List, path_to_save: str):
-    if not os.path.exists(path_to_save):
-        os.mkdir(path_to_save)
     df = pd.read_csv(path_to_df)
 
     files_list = df.loc[idx]['path_to_img'].to_list()
@@ -52,9 +50,13 @@ def save_train_test_df(path_to_df: str, idx: List, class_name: str):
 
 
 if __name__ == '__main__':
-    path = '../dataframes/bridge_down_with_subclass.csv'
+    print('Введите имя класса видео')
+    cls = input()
+    path = f'../dataframes/{cls}_with_subclass.csv'
     path_to_save = '../images_for_labeling'
-    name_cls = 'bridge_down'
+    if not os.path.exists(path_to_save):
+        os.mkdir(path_to_save)
+
     idx = get_sample_indexes(path_to_df=path, reduce_coef=0.6)
     copy_img_for_labeling(path_to_df=path, idx=idx, path_to_save=path_to_save)
-    save_train_test_df(path_to_df=path, idx=idx, class_name=name_cls)
+    save_train_test_df(path_to_df=path, idx=idx, class_name=cls)
