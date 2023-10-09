@@ -1,13 +1,10 @@
+from contrast_increase import contrast_increase
 from ultralytics import YOLO
-import cv2
 import numpy as np
-from get_problem_frames import contrast_increase
+import cv2
 
 
 def detect_class(video_path):
-    classes = ['bridge_down_1', 'bridge_down_2', 'bridge_up_1', 'bridge_up_2', 'coupling', 'plate_type_1',
-               'plate_type_2', 'track']
-
     # Подготовим нужные объекты
     # Списки для формирования матриц градиента цвета в контрольных точках
     pick_grad_list_1 = []
