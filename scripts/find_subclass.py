@@ -67,14 +67,13 @@ def reduce_dim(df: pd.DataFrame, len_vect: int = 25) -> np.ndarray:
     return pca.fit_transform(df)
 
 
-def plot_images(df: pd.DataFrame, path_to_img: str, split_idx: int):
+def plot_images(df: pd.DataFrame, split_idx: int):
     """Функция для изображения фреймов с косинусным расстояниями между ними от 1 фрейма"""
     count_rows = ceil(len(df) / 5)
     fig = plt.figure(figsize=(12, count_rows * 2))
 
-    for i, name in enumerate(df['file_name']):
-        img_name = name.split('.')[0]
-        frame = cv2.imread(f'{path_to_img}/{img_name}.jpg')
+    for i, img in enumerate(df['path_to_img']):
+        frame = cv2.imread(img)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         if i < split_idx:
             color = 'black'
@@ -147,7 +146,7 @@ def plot_subclasses(path_to_df: str, path_to_img: str):
 
 def calc_cos_dist(df: pd.DataFrame, num_row: int) -> pd.DataFrame:
     """Функция подсчета косинусного расстояния"""
-    matx = df.iloc[:, :25].values
+    matx = df.iloc[:, 4:].values
     df['cosine'] = cdist([matx[num_row]], matx, metric='cosine').flatten()
     df = df.sort_values('cosine').reset_index().rename(columns={'index': 'true_index'})
     return df
@@ -159,16 +158,15 @@ def name2path(row):
     return row
 
 
-def demo_mode(path_to_df: str, path_to_img: str, search_range: int = 20, sim_level: int = 3):
-    data = pd.read_csv(path_to_df)  # len(df.columns) = 513, df.columns[0] = 'file_name'
-    df_slim = pd.DataFrame(reduce_dim(data.iloc[:, 1:]))  # shape(len(df), 25)
-    df_slim['file_name'] = data['file_name']
-    df_slim['sub_class'] = - 1
-    num_row = np.random.choice(np.arange(len(df_slim)))
-    df_slim = calc_cos_dist(df_slim, num_row=num_row)
-    split_idx = find_similar_frames(df_slim.head(search_range)['cosine'].values, sim_level=sim_level)
-    plot_images(df=df_slim.head(search_range), path_to_img=path_to_img, split_idx=split_idx)
-    plot_cosines(df=df_slim.head(search_range), split_idx=split_idx)
+def demo_mode(path_to_df: str, search_range: int = 20, sim_level: int = 3):
+    data = pd.read_csv(path_to_df)
+    temp_df = data.copy()
+    temp_df['sub_class'] = - 1
+    num_row = np.random.choice(np.arange(len(temp_df)))
+    temp_df = calc_cos_dist(temp_df, num_row=num_row)
+    split_idx = find_similar_frames(temp_df.head(search_range)['cosine'].values, sim_level=sim_level)
+    plot_images(df=temp_df.head(search_range), split_idx=split_idx)
+    plot_cosines(df=temp_df.head(search_range), split_idx=split_idx)
     return None
 
 
@@ -192,13 +190,13 @@ def main_mode(path_to_df: str, path_to_img: str, search_range: int = 20, sim_lev
 
 
 if __name__ == '__main__':
-    path = '../dataframes/bridge_down_emb.csv'
+    path = '../dataframes/no_action_emb.csv'
     path_to_dir_images = '../images_for_emb/bridge_down'
-    # demo_mode(path_to_df=path, path_to_img=path_to_dir_images)
+    demo_mode(path_to_df=path)
 
-    df = main_mode(path_to_df=path, path_to_img=path_to_dir_images, plot=False, sim_level=3, search_range=20)
+    # df = main_mode(path_to_df=path, path_to_img=path_to_dir_images, plot=False, sim_level=3, search_range=20)
     # plot_subclasses('../dataframes/no_action_with_subclass.csv', path_to_dir_images)
-    df = df.iloc[:, -2:]  # Датафрейм без эмбеддингов, нам они больше не нужны
-    df = df.apply(name2path, axis=1)  # косметические преобразования для удобства в дальнейшем
-    df = df.rename(columns={'file_name': 'path_to_img'})
-    df.to_csv('../dataframes/bridge_down_with_subclass.csv', index=False)
+    # df = df.iloc[:, -2:]  # Датафрейм без эмбеддингов, нам они больше не нужны
+    # df = df.apply(name2path, axis=1)  # косметические преобразования для удобства в дальнейшем
+    # df = df.rename(columns={'file_name': 'path_to_img'})
+    # df.to_csv('../dataframes/bridge_down_with_subclass.csv', index=False)
