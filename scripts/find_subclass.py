@@ -124,26 +124,6 @@ def plot_cosines(df: pd.DataFrame, split_idx: int):
     plt.show()
 
 
-def plot_subclasses(path_to_df: str, path_to_img: str):
-    """Функция для визуализации результата разбиения на sub_classes"""
-    df = pd.read_csv(path_to_df)
-
-    for sub_class in df['sub_class'].unique():
-        temp_df = df[df['sub_class'] == sub_class]
-        count_rows = ceil(len(temp_df) / 5)
-        fig = plt.figure(figsize=(12, count_rows * 2))
-
-        for i, name in enumerate(temp_df['file_name']):
-            img_name = name.split('.')[0]
-            frame = cv2.imread(f'{path_to_img}/{img_name}.jpg')
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            fig.add_subplot(count_rows, 5, i + 1).set_title(f"sub_class: {sub_class}", size=9)
-            plt.imshow(frame)
-            plt.axis('off')
-
-        plt.show()
-
-
 def calc_cos_dist(df: pd.DataFrame, num_row: int) -> pd.DataFrame:
     """Функция подсчета косинусного расстояния"""
     matx = df.iloc[:, 4:].values
@@ -152,51 +132,41 @@ def calc_cos_dist(df: pd.DataFrame, num_row: int) -> pd.DataFrame:
     return df
 
 
-def name2path(row):
-    name = row['file_name'].split('.')[0]
-    row['file_name'] = f'{path_to_dir_images}/{name}.jpg'
-    return row
-
-
 def demo_mode(path_to_df: str, search_range: int = 20, sim_level: int = 3):
     data = pd.read_csv(path_to_df)
-    temp_df = data.copy()
-    temp_df['sub_class'] = - 1
-    num_row = np.random.choice(np.arange(len(temp_df)))
-    temp_df = calc_cos_dist(temp_df, num_row=num_row)
-    split_idx = find_similar_frames(temp_df.head(search_range)['cosine'].values, sim_level=sim_level)
-    plot_images(df=temp_df.head(search_range), split_idx=split_idx)
-    plot_cosines(df=temp_df.head(search_range), split_idx=split_idx)
+    df = data.copy()
+    df['sub_class'] = - 1
+    num_row = np.random.choice(np.arange(len(df)))
+    df = calc_cos_dist(df, num_row=num_row)
+    split_idx = find_similar_frames(df.head(search_range)['cosine'].values, sim_level=sim_level)
+    plot_images(df=df.head(search_range), split_idx=split_idx)
+    plot_cosines(df=df.head(search_range), split_idx=split_idx)
     return None
 
 
-def main_mode(path_to_df: str, path_to_img: str, search_range: int = 20, sim_level: int = 3, plot: bool = False):
-    data = pd.read_csv(path_to_df)  # len(df.columns) = 513, df.columns[0] = 'file_name'
-    df_slim = pd.DataFrame(reduce_dim(data.iloc[:, 1:]))  # shape(len(df), 25)
-    df_slim['file_name'] = data['file_name']
-    df_slim['sub_class'] = - 1
-    for i in range(len(df_slim)):
-        temp_df = df_slim[df_slim['sub_class'] == -1]
+def main_mode(path_to_df: str, search_range: int = 20, sim_level: int = 3, plot: bool = False):
+    data = pd.read_csv(path_to_df)
+    df = data.copy()
+    df['sub_class'] = - 1
+    for i in range(len(df)):
+        temp_df = df[df['sub_class'] == -1]
         if len(temp_df) == 0:
             break
         temp_df = calc_cos_dist(temp_df, num_row=0)
-        split_idx = find_similar_frames(temp_df.head(search_range)['cosine'].values, sim_level=3)
+        split_idx = find_similar_frames(temp_df.head(search_range)['cosine'].values, sim_level=sim_level)
         if plot:
-            plot_images(df=temp_df.head(search_range), path_to_img=path_to_img, split_idx=split_idx)
+            plot_images(df=temp_df.head(search_range), split_idx=split_idx)
             plot_cosines(df=temp_df.head(search_range), split_idx=split_idx)
         subclass_idxs = temp_df.head(split_idx)['true_index'].values
-        df_slim.loc[subclass_idxs, 'sub_class'] = i
-    return df_slim
+        df.loc[subclass_idxs, 'sub_class'] = i
+    return df
 
 
 if __name__ == '__main__':
-    path = '../dataframes/no_action_emb.csv'
-    path_to_dir_images = '../images_for_emb/bridge_down'
-    demo_mode(path_to_df=path)
+    print('Введите имя класса видео')
+    cls = input()
+    path = f'../dataframes/{cls}_emb.csv'
+    # demo_mode(path_to_df=path)
 
-    # df = main_mode(path_to_df=path, path_to_img=path_to_dir_images, plot=False, sim_level=3, search_range=20)
-    # plot_subclasses('../dataframes/no_action_with_subclass.csv', path_to_dir_images)
-    # df = df.iloc[:, -2:]  # Датафрейм без эмбеддингов, нам они больше не нужны
-    # df = df.apply(name2path, axis=1)  # косметические преобразования для удобства в дальнейшем
-    # df = df.rename(columns={'file_name': 'path_to_img'})
-    # df.to_csv('../dataframes/bridge_down_with_subclass.csv', index=False)
+    df = main_mode(path_to_df=path, plot=False, sim_level=3, search_range=20)
+    df.to_csv(f'../dataframes/{cls}_with_subclass.csv', index=False)
