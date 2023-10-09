@@ -53,6 +53,12 @@ if __name__ == '__main__':
     cls = input()
     path_to_video = f'../prepair_dataset/train/{cls}'
     path_to_img_dir = f'../images_for_emb/{cls}'
+
+    if not os.path.exists(path_to_img_dir):
+        os.mkdir(path_to_img_dir)
+    if not os.path.exists('../dataframes'):
+        os.mkdir(path_to_img_dir)
+
     embeddings = []
 
     #  Подготовка структуры датафрейма
