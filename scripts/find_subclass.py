@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
-from math import ceil
 import matplotlib.pyplot as plt
+from math import ceil
 import cv2
 from sklearn.decomposition import PCA
 from scipy.spatial.distance import cdist
