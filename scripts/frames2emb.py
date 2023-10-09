@@ -1,11 +1,12 @@
 from get_problem_frames import contrast_increase
 import cv2
-from torchvision import datasets, transforms
+from torchvision import transforms
 import torch
 import pandas as pd
 import numpy as np
 import os
 from tqdm import tqdm
+from sklearn.decomposition import PCA
 
 
 def get_one_embedding(module, args, output):
@@ -24,14 +25,13 @@ def cv2_img_to_emb(img: np.ndarray):
     return None
 
 
-def get_frames_and_emb(video: str):
+def get_frames_and_emb(video_path: str, img_path: str):
     """
     Функция берет только средний кадр из видео и:
-    1) Получает эмбеддинг фотографии
+    1) Генерирует эмбеддинг фотографии
     2) Сохраняет картинку в отдельную директорию
     """
-    file_name = video.split('.')[0]
-    cap = cv2.VideoCapture(f'{path_to_video}/{name_class}/{video}')
+    cap = cv2.VideoCapture(video_path)
     count_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     n_frame = count_frames // 2
     cap.set(cv2.CAP_PROP_POS_FRAMES, n_frame - 1)
@@ -39,28 +39,42 @@ def get_frames_and_emb(video: str):
     ret, frame = cap.read()
     frame_new = contrast_increase(frame)
     cv2_img_to_emb(frame_new)
-    cv2.imwrite(os.path.join(path_to_img_for_emb, f'{name_class}/{file_name}.jpg'), frame_new)
+    cv2.imwrite(img_path, frame_new)
+    return None
+
+
+def reduce_dim(matx: np.ndarray, len_vect: int = 25) -> np.ndarray:
+    pca = PCA(n_components=len_vect)
+    return pca.fit_transform(matx)
 
 
 if __name__ == '__main__':
-    path_to_video = '../prepair_dataset/train'
-    path_to_img_for_emb = '../images_for_emb'
-
     print("Введите имя класса видео")
-    name_class = input()
-    video_list = [f for f in os.listdir(f'{path_to_video}/{name_class}') if f.endswith('.mp4')]
+    cls = input()
+    path_to_video = f'../prepair_dataset/train/{cls}'
+    path_to_img_dir = f'../images_for_emb/{cls}'
     embeddings = []
 
+    #  Подготовка структуры датафрейма
+    df = pd.DataFrame()
+    df['video_name'] = [f for f in os.listdir(path_to_video) if f.endswith('.mp4')]
+    df['true_label'] = cls
+    df['path_to_video'] = df['video_name'].apply(lambda name: f'{path_to_video}/{name}')
+    df['path_to_img'] = df['video_name'].apply(lambda name: f"{path_to_img_dir}/{name.split('.')[0]}.jpg")
+
+    # Загрузка модели
     model = torch.hub.load('pytorch/vision:v0.10.0', 'resnet18', pretrained=True)
     layer = model._modules.get('avgpool')  # предпоследний слой ResNet
     # добавляем функцию, которая будет вызываться при выполнении forward() после предпоследнего слоя
     _ = layer.register_forward_hook(get_one_embedding)
     model.eval()  # режим модели - inference
 
-    for video in tqdm(video_list):
-        get_frames_and_emb(video)
+    # Перебираем все записи в датафрейме
+    for row in tqdm(range(len(df))):
+        get_frames_and_emb(video_path=df['path_to_video'][row], img_path=df['path_to_img'][row])
 
-    embeddings = np.vstack(embeddings)  # shape [len(video_list), 512]
-    matx = np.hstack((np.array(video_list).reshape(-1, 1), embeddings))
-    emb_df = pd.DataFrame(matx).rename(columns={0: 'file_name'})
-    emb_df.to_csv(f'../dataframes/{name_class}_emb.csv', index=False)
+    embeddings = np.vstack(embeddings)
+    embeddings = reduce_dim(matx=embeddings)  # снижаем размерность векторов до 25
+    df = pd.concat((df, pd.DataFrame(embeddings)), axis=1)  # shape [count_videos, 29]
+
+    df.to_csv(f'../dataframes/{cls}_emb.csv', index=False)
