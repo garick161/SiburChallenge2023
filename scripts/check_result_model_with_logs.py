@@ -11,7 +11,7 @@ class_detect_stats = np.zeros(shape=8, dtype='int32')  # для анализа �
 
 
 @logger.catch
-def detect_class(video_path):
+def detect_class(video_path: str, path_to_weights: str):
     classes = ['bridge_down_1', 'bridge_down_2', 'bridge_up_1', 'bridge_up_2', 'coupling', 'plate_type_1',
                'plate_type_2', 'track']
 
@@ -31,7 +31,7 @@ def detect_class(video_path):
     check_movie_point_x = 0
     check_movie_point_y = 0
 
-    model = YOLO('weights_ver4.pt')
+    model = YOLO(path_to_weights)
     cap = cv2.VideoCapture(video_path)
     fps = int(cap.get(cv2.CAP_PROP_FPS))
 
