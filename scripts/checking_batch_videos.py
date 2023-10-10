@@ -7,7 +7,7 @@ from tqdm import tqdm
 import os
 
 
-def check_video():
+def check_video(path_to_weights: str):
     """Функция запускает определение класса на видео и администрирует логирование"""
     count_video = 0
     count_class_detected = defaultdict(int)
@@ -17,7 +17,7 @@ def check_video():
             logger.info('#######################################\n')
             logger.info(f'{entry.path}\n')
             start_time = time.time()
-            stat_matx, result = detect_class(entry.path)  # Результат работы модели
+            stat_matx, result = detect_class(entry.path, path_to_weights)  # Результат работы модели
             count_class_detected[result] += 1
             logger.info(f'Operation:{result}\n')
             logger.info(
@@ -30,6 +30,7 @@ if __name__ == '__main__':
     print("Введите имя тестируемого класса")
     cls = input()
 
+    weights_path = 'weights_ver5.pt'
     path_to_dir = f'../prepair_dataset/train/{cls}'
     path_to_logs = '../logs'
     if not os.path.exists(path_to_logs):
@@ -42,5 +43,6 @@ if __name__ == '__main__':
     path_to_log_file = f'{path_to_logs}/{log_file_name}.log'
     logger.remove()  # Чтобы не выводилось в консоль, а писалось только в файл
     logger.add(path_to_log_file, format='{time:HH:mm:ss} {message}')
+    logger.info(f'Weight_of_model: {weights_path}')
 
-    check_video()
+    check_video(path_to_weights=weights_path)
