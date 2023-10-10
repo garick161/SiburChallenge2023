@@ -1,23 +1,19 @@
 from scripts.contrast_increase import contrast_increase
 from ultralytics import YOLO
-from PIL import Image
 from tqdm import tqdm
 import numpy as np
 import cv2
 import os
 
-model = YOLO('../scripts/weights_ver5.pt')  # предобученная модель с весам
-classes = ['bridge_down_1', 'bridge_down_2', 'bridge_up_1', 'bridge_up_2', 'coupling', 'plate_type_1',
-           'plate_type_2', 'track']
 
-
-def get_frames_with_bb(video_path: str, path_to_dir: str):
+def get_frames_with_bb(video_path: str, path_to_dir: str, path_to_weights: str):
     """
     Функция берет 1 кадр в секунду, производит детекцию объектов, наносит bounding_boxes
     """
     if not os.path.exists(path_to_dir):
         os.mkdir(path_to_dir)
     name_file = video_path.rsplit('\\', 1)[1].split('.')[0]
+    model = YOLO(path_to_weights)  # предобученная модель с весам
     cap = cv2.VideoCapture(video_path)
     fps = int(cap.get(cv2.CAP_PROP_FPS))
     bridge_up_flag = False
@@ -80,6 +76,7 @@ if __name__ == '__main__':
     # sel_videos = select_video(df=df, count=20)
     # for path in sel_videos:
     path = '../frames_with_boundig_boxes/ver5'
+    weights_path = '../scripts/weights_ver5.pt'
     for entry in tqdm(os.scandir('../prepair_dataset/train/train_in_out')):
         if entry.is_file() and entry.name.endswith('.mp4'):
-            get_frames_with_bb(video_path=entry.path, path_to_dir=path)
+            get_frames_with_bb(video_path=entry.path, path_to_dir=path, path_to_weights=weights_path)
