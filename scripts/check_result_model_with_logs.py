@@ -68,8 +68,7 @@ def detect_class(video_path: str, path_to_weights: str):
                             x1, _, _, y2 = box.xyxy[0]
                             x1 = int(x1)
                             y2 = int(y2)
-                            if x1 > grad.shape[0] // 2 and y2 > grad.shape[
-                                1] // 2:  # точка должна быть в нижнем правом квадрате
+                            if x1 > grad.shape[1] // 2 and y2 > grad.shape[0] // 2:  # точка должна быть в нижнем правом квадрате
                                 if y2 >= grad.shape[0]:
                                     y2 = grad.shape[0] - 1
                                 while grad[y2][x1] == 0:  # если нижняя точка окна черная, значит попали в черную полосу
