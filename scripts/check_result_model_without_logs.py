@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 
 
-def detect_class(video_path):
+def detect_class(video_path: str, path_to_weights: str):
     # Подготовим нужные объекты
     # Списки для формирования матриц градиента цвета в контрольных точках
     pick_grad_list_1 = []
@@ -21,7 +21,7 @@ def detect_class(video_path):
     check_movie_point_x = 0
     check_movie_point_y = 0
 
-    model = YOLO('weights_ver4.pt')
+    model = YOLO(path_to_weights)
     cap = cv2.VideoCapture(video_path)
     fps = int(cap.get(cv2.CAP_PROP_FPS))
 
@@ -58,8 +58,8 @@ def detect_class(video_path):
                             x1, _, _, y2 = box.xyxy[0]
                             x1 = int(x1)
                             y2 = int(y2)
-                            if x1 > grad.shape[0] // 2 and y2 > grad.shape[
-                                1] // 2:  # точка должна быть в нижнем правом квадрате
+                            if x1 > grad.shape[1] // 2 and y2 > grad.shape[
+                                0] // 2:  # точка должна быть в нижнем правом квадрате
                                 if y2 >= grad.shape[0]:
                                     y2 = grad.shape[0] - 1
                                 while grad[y2][x1] == 0:  # если нижняя точка окна черная, значит попали в черную полосу
