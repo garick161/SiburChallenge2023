@@ -1,0 +1,14 @@
+video_name,true_label,path_to_video,path_to_img
+01f23640259240cf.mp4,train_in_out,../prepair_dataset/train/train_in_out/01f23640259240cf.mp4,../images_for_labeling/01f23640259240cf.jpg
+b0dfec0651a7fcf9.mp4,train_in_out,../prepair_dataset/train/train_in_out/b0dfec0651a7fcf9.mp4,../images_for_labeling/b0dfec0651a7fcf9.jpg
+1858c7dd10a1817d.mp4,train_in_out,../prepair_dataset/train/train_in_out/1858c7dd10a1817d.mp4,../images_for_labeling/1858c7dd10a1817d.jpg
+68c64df10445214a.mp4,train_in_out,../prepair_dataset/train/train_in_out/68c64df10445214a.mp4,../images_for_labeling/68c64df10445214a.jpg
+ad81d4095b639979.mp4,train_in_out,../prepair_dataset/train/train_in_out/ad81d4095b639979.mp4,../images_for_labeling/ad81d4095b639979.jpg
+5564ec76ba7dcc48.mp4,train_in_out,../prepair_dataset/train/train_in_out/5564ec76ba7dcc48.mp4,../images_for_labeling/5564ec76ba7dcc48.jpg
+19812f99b20a1d2e.mp4,train_in_out,../prepair_dataset/train/train_in_out/19812f99b20a1d2e.mp4,../images_for_labeling/19812f99b20a1d2e.jpg
+b1f7d0affbba39aa.mp4,train_in_out,../prepair_dataset/train/train_in_out/b1f7d0affbba39aa.mp4,../images_for_labeling/b1f7d0affbba39aa.jpg
+1e62763c669920b4.mp4,train_in_out,../prepair_dataset/train/train_in_out/1e62763c669920b4.mp4,../images_for_labeling/1e62763c669920b4.jpg
+2ee79043d4122811.mp4,train_in_out,../prepair_dataset/train/train_in_out/2ee79043d4122811.mp4,../images_for_labeling/2ee79043d4122811.jpg
+24b468923c4ae72b.mp4,train_in_out,../prepair_dataset/train/train_in_out/24b468923c4ae72b.mp4,../images_for_labeling/24b468923c4ae72b.jpg
+e0351f88ed52db65.mp4,train_in_out,../prepair_dataset/train/train_in_out/e0351f88ed52db65.mp4,../images_for_labeling/e0351f88ed52db65.jpg
+bca616c889f94f27.mp4,train_in_out,../prepair_dataset/train/train_in_out/bca616c889f94f27.mp4,../images_for_labeling/bca616c889f94f27.jpg
