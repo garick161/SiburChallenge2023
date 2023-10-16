@@ -1,10 +1,10 @@
+from sklearn.decomposition import PCA
+from scipy.spatial.distance import cdist
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from math import ceil
 import cv2
-from sklearn.decomposition import PCA
-from scipy.spatial.distance import cdist
 
 pd.options.mode.chained_assignment = None
 
@@ -133,6 +133,15 @@ def calc_cos_dist(df: pd.DataFrame, num_row: int) -> pd.DataFrame:
 
 
 def demo_mode(path_to_df: str, search_range: int = 20, sim_level: int = 3):
+    """
+    Функция для иллюстрации работы метода разбиения на подклассы.
+    При каждом запуске выбирается случайный фрейм и относительно него формируется подкласс
+
+    :param path_to_df: Путь файлу ".csv"
+    :param search_range: Какой диапазон поиска похожих фото мы будем рассматривать
+    :param sim_level: Уровень похожести. Описан подробно в функции "find_similar_frames"
+    :return: None
+    """
     data = pd.read_csv(path_to_df)
     df = data.copy()
     df['sub_class'] = - 1
@@ -144,7 +153,17 @@ def demo_mode(path_to_df: str, search_range: int = 20, sim_level: int = 3):
     return None
 
 
-def main_mode(path_to_df: str, search_range: int = 20, sim_level: int = 3, plot: bool = False):
+def main_mode(path_to_df: str, search_range: int = 20, sim_level: int = 3, plot: bool = False) -> pd.DataFrame:
+    """
+    Основной метод разделения на подклассы с функцией показа промежуточных результатов.
+    Выбирает всегда первый неразмеченный фрейм и относительно него ищет границу разбиения.
+
+    :param path_to_df: Путь файлу ".csv"
+    :param search_range: Какой диапазон поиска похожих фото мы будем рассматривать
+    :param sim_level: Уровень похожести. Описан подробно в функции "find_similar_frames"
+    :param plot: В случае plot = True будут отображаться промежуточные результаты
+    :return: датафрейм с дополнительной колонкой "sub_class"
+    """
     data = pd.read_csv(path_to_df)
     df = data.copy()
     df['sub_class'] = - 1
@@ -166,7 +185,6 @@ if __name__ == '__main__':
     print('Введите имя класса видео')
     cls = input()
     path = f'../dataframes/{cls}_emb.csv'
-    # demo_mode(path_to_df=path)
 
-    df = main_mode(path_to_df=path, plot=False, sim_level=3, search_range=20)
+    df = main_mode(path_to_df=path, plot=True, sim_level=3, search_range=20)
     df.to_csv(f'../dataframes/{cls}_with_subclass.csv', index=False)
