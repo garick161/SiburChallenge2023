@@ -26,6 +26,7 @@ def get_frames_with_bb(video_path: str, path_to_dir: str, path_to_weights: str):
         if ret:
             frame_id = int(round(cap.get(1)))
             if frame_id % fps == 0:  # выбираем только каждый n-ый кадр
+
                 # выполняем повышение контрастности для удаления засвеченности
                 frame_new = contrast_increase(image=frame)
                 class_arr = np.zeros(shape=8, dtype='uint8')
@@ -73,10 +74,8 @@ def get_frames_with_bb(video_path: str, path_to_dir: str, path_to_weights: str):
 
 
 if __name__ == '__main__':
-    # sel_videos = select_video(df=df, count=20)
-    # for path in sel_videos:
-    path = '../frames_with_boundig_boxes/ver5'
-    weights_path = 'weights_ver5.pt'
-    for entry in tqdm(os.scandir('../prepair_dataset/train/train_in_out')):
+    path = '../frames_with_boundig_boxes/ver1'
+    weights_path = '../weights/weights_ver1.pt'
+    for entry in tqdm(os.scandir('../sel_for_present/for_read_me')):
         if entry.is_file() and entry.name.endswith('.mp4'):
             get_frames_with_bb(video_path=entry.path, path_to_dir=path, path_to_weights=weights_path)
