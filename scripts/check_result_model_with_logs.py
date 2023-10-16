@@ -1,9 +1,9 @@
+from scripts.contrast_increase import contrast_increase
 from ultralytics import YOLO
 import cv2
 import numpy as np
 import pandas as pd
 from loguru import logger
-from get_problem_frames import contrast_increase
 
 pd.set_option('display.max_columns', None)
 
@@ -11,7 +11,20 @@ class_detect_stats = np.zeros(shape=8, dtype='int32')  # для анализа �
 
 
 @logger.catch
-def detect_class(video_path: str, path_to_weights: str):
+def detect_class(video_path: str, path_to_weights: str) -> (np.ndarray, str):
+    """
+    Функция обрабатывает только один видеофайл. Проходит следующие этапы:
+    - разбивает видео на кадры (1 кадр в секунду)
+    - выполняет повышение контрастности фреймов
+    - выполняет Object Detection по каждому фрейму
+    - накапливает статистику по каждому видео
+    - ведет запись контрольных точек в файл логирования
+    - принимает решение: к какому классу принадлежит видео?
+
+    :param video_path: Путь к видеофайлу
+    :param path_to_weights: Путь к весам модели YOLO 8n
+    :return: кортеж из массива статистики обнаруженных объектов на всех фреймах и название класса видео
+    """
     classes = ['bridge_down_1', 'bridge_down_2', 'bridge_up_1', 'bridge_up_2', 'coupling', 'plate_type_1',
                'plate_type_2', 'track']
 
