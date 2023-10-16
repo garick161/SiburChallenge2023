@@ -7,8 +7,18 @@ from tqdm import tqdm
 import os
 
 
-def check_video(path_to_weights: str):
-    """Функция запускает определение класса на видео и администрирует логирование"""
+def check_video(path_to_weights: str, path_to_dir: str):
+    """
+    Функция выполняет запускает определение классов для массива из видеофайлов:
+    - перебивает все файлы по указанному пути и запускает процесс определения класса.
+    Используется функция "detect_class" из файла "check_result_model_with_logs.py"
+    - собирает статистику
+    - администрирует логирование
+
+    :param path_to_weights: Путь к весам модели YOLO 8n
+    :param path_to_dir: Путь к директории с файлами
+    :return: None
+    """
     count_video = 0
     count_class_detected = defaultdict(int)
     for entry in tqdm(os.scandir(path_to_dir)):
@@ -25,13 +35,15 @@ def check_video(path_to_weights: str):
     else:
         logger.info(f'{count_class_detected}\ncount_video: {count_video}\n{dict(zip(classes, stat_matx))}')
 
+    return None
+
 
 if __name__ == '__main__':
     print("Введите имя тестируемого класса")
     cls = input()
 
-    weights_path = 'weights_ver5.pt'
-    path_to_dir = f'../prepair_dataset/train/{cls}'
+    weights_path = '../weights/weights_ver5.pt'
+    dir_path = f'../prepair_dataset/train/{cls}'
     path_to_logs = '../logs'
     if not os.path.exists(path_to_logs):
         os.mkdir(path_to_logs)
@@ -45,4 +57,4 @@ if __name__ == '__main__':
     logger.add(path_to_log_file, format='{time:HH:mm:ss} {message}')
     logger.info(f'Weight_of_model: {weights_path}')
 
-    check_video(path_to_weights=weights_path)
+    check_video(path_to_weights=weights_path, path_to_dir=dir_path)
