@@ -4,10 +4,10 @@ import pandas as pd
 from tqdm import tqdm
 
 
-def predict(df: pd.DataFrame) -> pd.DataFrame:
+def predict(df: pd.DataFrame, path_to_weights: str) -> pd.DataFrame:
     predict_list = []
     for video in tqdm(df['path_to_video']):
-        result = detect_class(video)
+        result = detect_class(video, path_to_weights)
         predict_list.append(result)
     df['predict'] = predict_list
     return df
@@ -21,6 +21,7 @@ def print_classfication_report(df: pd.DataFrame, name: str):
 if __name__ == '__main__':
     print("Введите 'train' или 'test'")
     sample = input()
+    weights_path = '../weights/weights_ver5.pt'
 
     bridge_down = pd.read_csv(f'../dataframes/bridge_down_{sample}.csv')
     bridge_up = pd.read_csv(f'../dataframes/bridge_up_{sample}.csv')
@@ -35,5 +36,5 @@ if __name__ == '__main__':
                           train_in_out[columns]),
                          axis=0, ignore_index=True)
 
-    result = predict(df=all_data)
+    result = predict(df=all_data, path_to_weights=weights_path)
     print_classfication_report(df=result, name=sample)
