@@ -35,3 +35,5 @@ __*Цитата из условия задачи:*__
 
 Формат видеороликов выглядит следующим образом
 ![readme_0_79](https://github.com/garick161/SiburChallenge2023/assets/114688542/b4020ee5-067e-426c-9ea8-b5f894c71459)
+
+![readme_80_159](https://github.com/garick161/SiburChallenge2023/assets/114688542/3541e64c-0283-4e90-a793-6d02e2eb8f46)
