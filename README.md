@@ -85,7 +85,7 @@ https://nbviewer.org/github/garick161/SiburChallenge2023/blob/master/notebooks/r
 - Получение эмбеддингов - `Resnet18` - https://pytorch.org/hub/pytorch_vision_resnet/
 - Трансформации изображений - `OpenCV` - https://opencv.org/\
 
-С всем списком используемых библиотек вы можете ознакомится в файле `requirements.txt`
+Со всем списком используемых библиотек вы можете ознакомится в файле `requirements.txt`
 
 # Результаты
 - Для обучения использовались кадры из 255 видео (train)
