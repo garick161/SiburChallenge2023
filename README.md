@@ -47,7 +47,7 @@ https://nbviewer.org/github/garick161/SiburChallenge2023/blob/master/notebooks/r
 
 # Файловая структура проекта
 `notebooks` - содержит файлы jupiter notebooks
-- `research.jpynb` - Изложение хода иследования  
+- `research_review.jpynb` - Изложение хода иследования  
 - `yolo8_train.jpynb` - Обучение модели YOLO 8n на платформе Google_Colab
 
 `scripts` - основной модуль проекта. Содержит набор скриптов. Перечисляться будут согласно логической связи.
