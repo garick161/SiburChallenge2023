@@ -37,3 +37,6 @@ __*Цитата из условия задачи:*__
 ![readme_0_79](https://github.com/garick161/SiburChallenge2023/assets/114688542/b4020ee5-067e-426c-9ea8-b5f894c71459)
 
 ![readme_80_159](https://github.com/garick161/SiburChallenge2023/assets/114688542/3541e64c-0283-4e90-a793-6d02e2eb8f46)
+
+![readme_160_239](https://github.com/garick161/SiburChallenge2023/assets/114688542/0e57a926-235e-461f-96d5-85bb11e86975)
+
